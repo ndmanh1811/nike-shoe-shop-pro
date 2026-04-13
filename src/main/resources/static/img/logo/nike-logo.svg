@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 240">
+  <rect width="600" height="240" rx="28" fill="#ffffff"/>
+  <path d="M105 145c96-41 169-67 240-83 5-1 9 5 4 8-45 31-93 66-141 95-35 21-64 31-99 21-21-6-31-27-4-41z" fill="#0a0a0a"/>
+  <text x="340" y="142" font-size="88" font-family="Arial" font-weight="900" fill="#0a0a0a">NIKE</text>
+</svg>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders</title>
+    <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/webjars/bootstrap-icons/font/bootstrap-icons.css}" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<div th:replace="~{fragments/admin :: layout(~{::content})}">
+    <div th:fragment="content">
+        <div class="admin-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0">Orders</h5>
+                <a th:href="@{/admin/dashboard}" class="text-decoration-none">Back dashboard</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-dark table-borderless align-middle">
+                    <thead>
+                    <tr><th>Code</th><th>Customer</th><th>Email</th><th>Status</th><th>Total</th><th>Created</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="o : ${orders}">
+                        <td><a class="text-white text-decoration-none" th:href="@{/admin/orders/{id}(id=${o.id})}" th:text="${o.orderCode}"></a></td>
+                        <td th:text="${o.customerName}"></td>
+                        <td th:text="${o.email}"></td>
+                        <td><span class="badge text-bg-warning" th:text="${o.status}"></span></td>
+                        <td th:text="${#numbers.formatDecimal(o.totalAmount,0,'COMMA',0,'POINT')} + ' đ'"></td>
+                        <td th:text="${#temporals.format(o.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

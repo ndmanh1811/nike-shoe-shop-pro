@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShoeHouse | Shop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/webjars/font-awesome/css/all.min.css}" rel="stylesheet">
+    <link th:href="@{/webjars/bootstrap-icons/font/bootstrap-icons.css}" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/site.css}">
+</head>
+<body>
+<div th:replace="~{fragments/site :: header}"></div>
+
+<section class="page-hero py-5">
+    <div class="container">
+        <div class="row align-items-end g-3">
+            <div class="col-lg-8">
+                <div class="eyebrow">Shop collection</div>
+                <h1 class="display-5 fw-bold mb-0">Find your next sneaker</h1>
+                <p class="text-muted mt-2 mb-0">Search, filter, sort and explore the latest drops.</p>
+            </div>
+            <div class="col-lg-4">
+                <form class="search-bar" method="get" th:action="@{/shop}">
+                    <input type="text" class="form-control" name="keyword" placeholder="Search shoes..." th:value="${keyword}">
+                    <button class="btn btn-accent"><i class="bi bi-search"></i></button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="container py-4">
+    <div class="row g-4">
+        <div class="col-lg-3">
+            <div class="filter-card">
+                <h5 class="fw-bold mb-3">Filter</h5>
+                <form method="get" th:action="@{/shop}" class="d-grid gap-3">
+                    <input type="text" class="form-control" name="keyword" placeholder="Keyword" th:value="${keyword}">
+                    <select class="form-select" name="categoryId">
+                        <option value="">All categories</option>
+                        <option th:each="c : ${navCategories}" th:value="${c.id}" th:text="${c.name}" th:selected="${categoryId != null and categoryId == c.id}"></option>
+                    </select>
+                    <select class="form-select" name="brandId">
+                        <option value="">All brands</option>
+                        <option th:each="b : ${navBrands}" th:value="${b.id}" th:text="${b.name}" th:selected="${brandId != null and brandId == b.id}"></option>
+                    </select>
+                    <select class="form-select" name="shoeSize">
+                        <option value="">All sizes</option>
+                        <option th:each="size : ${#numbers.sequence(39,46)}" th:value="${size}" th:text="${size}" th:selected="${shoeSize != null and shoeSize == size.toString()}"></option>
+                    </select>
+                    <select class="form-select" name="sort">
+                        <option value="">Newest</option>
+                        <option value="price-asc" th:selected="${sort == 'price-asc'}">Price low → high</option>
+                        <option value="price-desc" th:selected="${sort == 'price-desc'}">Price high → low</option>
+                        <option value="featured" th:selected="${sort == 'featured'}">Featured</option>
+                        <option value="bestseller" th:selected="${sort == 'bestseller'}">Best seller</option>
+                    </select>
+                    <button class="btn btn-dark rounded-pill">Apply</button>
+                    <a th:href="@{/shop}" class="btn btn-outline-dark rounded-pill">Reset</a>
+                </form>
+
+                <hr class="my-4">
+                <div class="small text-muted">
+                    <div class="mb-2">Results: <strong th:text="${totalItems}"></strong></div>
+                    <div class="mb-2">Current page: <strong th:text="${currentPage}"></strong>/<span th:text="${totalPages}"></span></div>
+                    <div>Page size: <strong th:text="${pageSize}"></strong></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <div class="text-muted">Showing <strong th:text="${products.size()}"></strong> of <strong th:text="${totalItems}"></strong> products</div>
+                <a th:href="@{/wishlist}" class="btn btn-outline-dark rounded-pill">Open wishlist</a>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-6 col-xl-4" th:each="p : ${products}">
+                    <div class="product-card">
+                        <div class="product-thumb">
+                            <img th:src="${p.imageUrl}" th:alt="${p.name}">
+                            <div class="product-badges">
+                                <span class="badge rounded-pill text-bg-dark" th:if="${p.featured}">Featured</span>
+                                <span class="badge rounded-pill text-bg-light text-dark" th:if="${p.bestseller}">Best seller</span>
+                            </div>
+                            <form th:action="@{/wishlist/toggle}" method="post" class="wishlist-floating-form">
+                                <input type="hidden" name="productId" th:value="${p.id}">
+                                <button class="icon-chip" type="submit" title="Wishlist">
+                                    <i class="bi bi-heart"></i>
+                                </button>
+                            </form>
+                        </div>
+                        <div class="product-body">
+                            <small class="text-uppercase text-white-50" th:text="${p.brand.name}"></small>
+                            <h5 class="mt-1 mb-1 fw-bold clamp-2" th:text="${p.name}"></h5>
+                            <p class="text-white-50 clamp-2 mb-3" th:text="${p.description}"></p>
+                            <div class="price-row">
+                                <span class="price" th:text="${#numbers.formatDecimal(p.effectivePrice(),0,'COMMA',0,'POINT')} + ' đ'"></span>
+                                <span class="text-decoration-line-through text-white-50" th:if="${p.salePrice != null and p.salePrice > 0 and p.salePrice < p.price}" th:text="${#numbers.formatDecimal(p.price,0,'COMMA',0,'POINT')} + ' đ'"></span>
+                            </div>
+                            <div class="d-flex gap-2 mt-3">
+                                <a th:href="@{'/product/' + ${p.slug}}" class="btn btn-light btn-sm rounded-pill flex-grow-1">Details</a>
+                                <form th:action="@{/cart/add}" method="post">
+                                    <input type="hidden" name="productId" th:value="${p.id}">
+                                    <input type="hidden" name="quantity" value="1">
+                                    <input type="hidden" name="size" value="42">
+                                    <button class="btn btn-accent btn-sm rounded-pill"><i class="bi bi-bag-plus"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="empty-state" th:if="${#lists.isEmpty(products)}">
+                <i class="bi bi-box-seam"></i>
+                <h4 class="fw-bold mt-3">No products match your filters</h4>
+                <p class="text-muted mb-0">Try another keyword, category, brand or size.</p>
+            </div>
+
+            <nav th:if="${totalItems > 0}" class="mt-5">
+                <ul class="pagination pagination-dark justify-content-center flex-wrap gap-2">
+                    <li class="page-item" th:classappend="${currentPage == 1 ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/shop(page=${currentPage - 1}, keyword=${keyword}, categoryId=${categoryId}, brandId=${brandId}, shoeSize=${shoeSize}, sort=${sort})}">Prev</a>
+                    </li>
+                    <li class="page-item" th:each="p : ${#numbers.sequence(1, totalPages)}" th:classappend="${p == currentPage ? 'active' : ''}">
+                        <a class="page-link" th:text="${p}" th:href="@{/shop(page=${p}, keyword=${keyword}, categoryId=${categoryId}, brandId=${brandId}, shoeSize=${shoeSize}, sort=${sort})}"></a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage == totalPages ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/shop(page=${currentPage + 1}, keyword=${keyword}, categoryId=${categoryId}, brandId=${brandId}, shoeSize=${shoeSize}, sort=${sort})}">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</section>
+
+<div th:replace="~{fragments/site :: footer}"></div>
+<script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

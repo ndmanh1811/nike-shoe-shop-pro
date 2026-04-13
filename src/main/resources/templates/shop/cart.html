@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShoeHouse | Cart</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/webjars/bootstrap-icons/font/bootstrap-icons.css}" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/site.css}">
+</head>
+<body>
+<div th:replace="~{fragments/site :: header}"></div>
+
+<section class="container py-5">
+    <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-3">
+        <div>
+            <div class="eyebrow text-dark">Your bag</div>
+            <h1 class="fw-bold mb-0">Shopping cart</h1>
+        </div>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-dark rounded-pill" th:href="@{/shop}">Continue shopping</a>
+            <a class="btn btn-outline-dark rounded-pill" th:href="@{/wishlist}">Wishlist</a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="table-card">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th style="min-width: 260px;">Options</th>
+                            <th>Price</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="item : ${cartItems}">
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <img th:src="${item.imageUrl}" alt="" class="cart-thumb">
+                                    <div>
+                                        <div class="fw-semibold" th:text="${item.name}"></div>
+                                        <small class="text-muted" th:text="${item.slug}"></small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <form th:action="@{/cart/update}" method="post" class="d-grid gap-2">
+                                    <input type="hidden" name="productId" th:value="${item.productId}">
+                                    <div class="d-flex gap-2 align-items-center">
+                                        <select name="size" class="form-select form-select-sm">
+                                            <option th:selected="${item.size == '39'}">39</option>
+                                            <option th:selected="${item.size == '40'}">40</option>
+                                            <option th:selected="${item.size == '41'}">41</option>
+                                            <option th:selected="${item.size == '42'}">42</option>
+                                            <option th:selected="${item.size == '43'}">43</option>
+                                            <option th:selected="${item.size == '44'}">44</option>
+                                            <option th:selected="${item.size == '45'}">45</option>
+                                            <option th:selected="${item.size == '46'}">46</option>
+                                        </select>
+                                        <input type="number" name="quantity" min="1" class="form-control form-control-sm" th:value="${item.quantity}">
+                                    </div>
+                                    <button class="btn btn-sm btn-dark rounded-pill w-100">Update</button>
+                                </form>
+                            </td>
+                            <td th:text="${#numbers.formatDecimal(item.subtotal,0,'COMMA',0,'POINT')} + ' đ'"></td>
+                            <td class="text-end">
+                                <form th:action="@{/cart/remove}" method="post" class="d-inline">
+                                    <input type="hidden" name="productId" th:value="${item.productId}">
+                                    <button class="btn btn-sm btn-outline-danger rounded-pill"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(cartItems)}">
+                            <td colspan="4" class="text-center py-5 text-muted">Your cart is empty.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="summary-card mb-4">
+                <h4 class="fw-bold mb-3">Coupon</h4>
+                <form th:action="@{/cart/coupon/apply}" method="post" class="d-flex gap-2 mb-3">
+                    <input type="text" name="couponCode" class="form-control" th:value="${couponCode}" placeholder="NIKE10">
+                    <button class="btn btn-dark rounded-pill">Apply</button>
+                </form>
+                <form th:action="@{/cart/coupon/clear}" method="post" th:if="${couponCode != null and !#strings.isEmpty(couponCode)}">
+                    <button class="btn btn-outline-dark rounded-pill w-100 mb-3">Remove coupon</button>
+                </form>
+                <div class="small text-muted mb-3" th:if="${couponQuote != null}">
+                    Applied <strong th:text="${couponQuote.title}"></strong><br>
+                    <span th:text="${couponQuote.description}"></span>
+                </div>
+
+                <h4 class="fw-bold mb-3">Order summary</h4>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Subtotal</span><strong th:text="${#numbers.formatDecimal(subtotal,0,'COMMA',0,'POINT')} + ' đ'"></strong>
+                </div>
+                <div class="d-flex justify-content-between mb-2 text-success" th:if="${discountAmount > 0}">
+                    <span>Discount</span><strong>-<span th:text="${#numbers.formatDecimal(discountAmount,0,'COMMA',0,'POINT')} + ' đ'"></span></strong>
+                </div>
+                <div class="d-flex justify-content-between mb-2 text-muted">
+                    <span>Shipping</span><span>Calculated at checkout</span>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <span class="fs-5 fw-semibold">Total</span>
+                    <span class="fs-4 fw-black" th:text="${#numbers.formatDecimal(grandTotal,0,'COMMA',0,'POINT')} + ' đ'"></span>
+                </div>
+                <a th:href="@{/checkout}" class="btn btn-accent btn-lg w-100 rounded-pill">Checkout</a>
+            </div>
+
+            <div class="summary-card">
+                <h6 class="fw-bold mb-3">Active offers</h6>
+                <div class="offer-list">
+                    <div class="offer-pill">NIKE10 · 10% off</div>
+                    <div class="offer-pill">STREET15 · 15% off</div>
+                    <div class="offer-pill">SNK100 · 100k off</div>
+                    <div class="offer-pill">VIP20 · 20% off</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div th:replace="~{fragments/site :: footer}"></div>
+<script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

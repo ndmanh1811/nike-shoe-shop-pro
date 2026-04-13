@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | ShoeHouse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/site.css}">
+</head>
+<body class="auth-bg">
+<section class="auth-shell">
+    <div class="auth-card">
+        <div class="mb-4 text-center">
+            <div class="brand-mark mx-auto mb-3">S</div>
+            <h2 class="fw-bold">Create account</h2>
+            <p class="text-muted mb-0">Join the sneaker crew.</p>
+        </div>
+
+        ```
+        <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+        <form th:action="@{/register}" method="post" th:object="${form}" class="d-grid gap-3">
+
+            <!-- FIX CSRF -->
+            <input type="hidden" th:if="${_csrf != null}"
+                   th:name="${_csrf.parameterName}"
+                   th:value="${_csrf.token}"/>
+
+            <div>
+                <label class="form-label">Email</label>
+                <input class="form-control form-control-lg" th:field="*{email}" required>
+            </div>
+            <div>
+                <label class="form-label">Full name</label>
+                <input class="form-control form-control-lg" th:field="*{fullName}" required>
+            </div>
+            <div>
+                <label class="form-label">Password</label>
+                <input class="form-control form-control-lg" type="password" th:field="*{password}" required>
+            </div>
+            <div>
+                <label class="form-label">Phone</label>
+                <input class="form-control form-control-lg" th:field="*{phone}">
+            </div>
+            <div>
+                <label class="form-label">Address</label>
+                <textarea class="form-control form-control-lg" rows="3" th:field="*{address}"></textarea>
+            </div>
+
+            <!-- FIX redirect sai -->
+            <button type="submit" class="btn btn-accent btn-lg rounded-pill">Register</button>
+        </form>
+
+        <div class="text-center mt-4">
+            <a th:href="@{/login}" class="text-decoration-none fw-semibold">
+                Already have an account?
+            </a>
+        </div>
+    </div>
+    ```
+
+</section>
+<script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

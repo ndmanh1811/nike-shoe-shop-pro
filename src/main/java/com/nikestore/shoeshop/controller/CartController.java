@@ -1,0 +1,160 @@
+package com.nikestore.shoeshop.controller;
+
+import com.nikestore.shoeshop.dto.CheckoutForm;
+import com.nikestore.shoeshop.entity.CustomerOrder;
+import com.nikestore.shoeshop.repository.AppUserRepository;
+import com.nikestore.shoeshop.service.CartService;
+import com.nikestore.shoeshop.service.CatalogService;
+import com.nikestore.shoeshop.service.CouponService;
+import com.nikestore.shoeshop.service.OrderService;
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+
+@Controller
+public class CartController {
+
+    private static final String COUPON_KEY = "CART_COUPON";
+
+    private final CartService cartService;
+    private final CatalogService catalogService;
+    private final OrderService orderService;
+    private final AppUserRepository userRepository;
+    private final CouponService couponService;
+
+    public CartController(CartService cartService,
+                          CatalogService catalogService,
+                          OrderService orderService,
+                          AppUserRepository userRepository,
+                          CouponService couponService) {
+        this.cartService = cartService;
+        this.catalogService = catalogService;
+        this.orderService = orderService;
+        this.userRepository = userRepository;
+        this.couponService = couponService;
+    }
+
+    @PostMapping("/cart/add")
+    public String addToCart(
+            @RequestParam Long productId,
+            @RequestParam(defaultValue = "1") int quantity,
+            @RequestParam(defaultValue = "42") String size,
+            HttpSession session
+    ) {
+        cartService.add(session, catalogService.requireProductById(productId), quantity, size);
+        return "redirect:/cart";
+    }
+
+    @GetMapping("/cart")
+    public String cart(HttpSession session, Model model) {
+        double subtotal = cartService.total(session);
+        String couponCode = couponCode(session);
+        CouponService.CouponQuote couponQuote = couponService.quote(couponCode, subtotal).orElse(null);
+        populateSummary(model, session, subtotal, couponCode, couponQuote);
+        model.addAttribute("cartItems", cartService.items(session).values());
+        return "shop/cart";
+    }
+
+    @PostMapping("/cart/update")
+    public String updateCart(@RequestParam Long productId, @RequestParam int quantity, @RequestParam String size, HttpSession session) {
+        cartService.update(session, productId, quantity, size);
+        return "redirect:/cart";
+    }
+
+    @PostMapping("/cart/remove")
+    public String removeCart(@RequestParam Long productId, HttpSession session) {
+        cartService.remove(session, productId);
+        return "redirect:/cart";
+    }
+
+    @PostMapping("/cart/coupon/apply")
+    public String applyCoupon(@RequestParam String couponCode, HttpSession session) {
+        if (couponCode != null && !couponCode.isBlank()) {
+            session.setAttribute(COUPON_KEY, couponCode.trim().toUpperCase());
+        }
+        return "redirect:/cart";
+    }
+
+    @PostMapping("/cart/coupon/clear")
+    public String clearCoupon(HttpSession session) {
+        session.removeAttribute(COUPON_KEY);
+        return "redirect:/cart";
+    }
+
+    @GetMapping("/checkout")
+    public String checkout(HttpSession session, Model model, Authentication authentication) {
+        if (cartService.count(session) == 0) {
+            return "redirect:/shop";
+        }
+        CheckoutForm form = new CheckoutForm();
+        if (authentication != null && authentication.isAuthenticated()) {
+            var user = userRepository.findByEmail(authentication.getName()).orElse(null);
+            if (user != null) {
+                form.setCustomerName(user.getFullName());
+                form.setPhone(user.getPhone() != null ? user.getPhone() : "");
+                form.setAddress(user.getAddress() != null ? user.getAddress() : "");
+            }
+        }
+        form.setCouponCode(couponCode(session));
+
+        double subtotal = cartService.total(session);
+        CouponService.CouponQuote couponQuote = couponService.quote(form.getCouponCode(), subtotal).orElse(null);
+
+        model.addAttribute("form", form);
+        model.addAttribute("cartItems", cartService.items(session).values());
+        populateSummary(model, session, subtotal, form.getCouponCode(), couponQuote);
+        return "shop/checkout";
+    }
+
+    @PostMapping("/checkout")
+    public String placeOrder(@Valid @ModelAttribute("form") CheckoutForm form,
+                             BindingResult bindingResult,
+                             HttpSession session,
+                             Authentication authentication,
+                             Model model) {
+        if (cartService.count(session) == 0) {
+            return "redirect:/shop";
+        }
+        double subtotal = cartService.total(session);
+        CouponService.CouponQuote couponQuote = couponService.quote(form.getCouponCode(), subtotal).orElse(null);
+        if (form.getCouponCode() != null && !form.getCouponCode().isBlank() && couponQuote == null) {
+            bindingResult.rejectValue("couponCode", "invalid", "Coupon is invalid or not eligible for this order.");
+        }
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("cartItems", cartService.items(session).values());
+            populateSummary(model, session, subtotal, form.getCouponCode(), couponQuote);
+            return "shop/checkout";
+        }
+        String email = authentication != null ? authentication.getName() : "guest@example.com";
+        CustomerOrder order = orderService.createOrder(form, cartService.items(session), email, couponQuote);
+        cartService.clear(session);
+        session.removeAttribute(COUPON_KEY);
+        return "redirect:/checkout/success/" + order.getOrderCode();
+    }
+
+    @GetMapping("/checkout/success/{orderCode}")
+    public String success(@PathVariable String orderCode, Model model) {
+        model.addAttribute("order", orderService.requireOrderByCode(orderCode));
+        return "shop/order-success";
+    }
+
+    private String couponCode(HttpSession session) {
+        Object raw = session.getAttribute(COUPON_KEY);
+        return raw == null ? "" : raw.toString();
+    }
+
+    private void populateSummary(Model model, HttpSession session, double subtotal, String couponCode, CouponService.CouponQuote couponQuote) {
+        double discount = couponQuote != null ? couponQuote.getDiscountAmount() : 0d;
+        double grandTotal = Math.max(0d, subtotal - discount);
+        model.addAttribute("subtotal", subtotal);
+        model.addAttribute("discountAmount", discount);
+        model.addAttribute("grandTotal", grandTotal);
+        model.addAttribute("couponCode", couponCode);
+        model.addAttribute("couponQuote", couponQuote);
+        model.addAttribute("cartCount", cartService.count(session));
+    }
+}
