@@ -190,6 +190,7 @@ a{text-decoration:none}
   content:'';position:absolute;inset:0;
   background:linear-gradient(135deg,transparent 40%,rgba(255,90,42,.1) 100%);
   opacity:0;transition:opacity .4s;
+  pointer-events:none;
 }
 .feature-card:hover{
   transform:translateY(-8px) scale(1.02);
@@ -228,6 +229,7 @@ a{text-decoration:none}
   content:'';position:absolute;inset:0;
   background:linear-gradient(135deg,var(--accent),var(--accent-2));
   opacity:0;transition:opacity .3s;
+  pointer-events:none;
 }
 .brand-pill:hover{
   color:#fff;transform:translateY(-3px) scale(1.05);

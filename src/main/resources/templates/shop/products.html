@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ShoeHouse | Shop</title>
+    <title>ShoeHouse | <span th:text="#{nav.shop}">Shop</span></title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -20,13 +20,13 @@
     <div class="container">
         <div class="row align-items-end g-3">
             <div class="col-lg-8">
-                <div class="eyebrow">Shop collection</div>
-                <h1 class="display-5 fw-bold mb-0">Find your next sneaker</h1>
-                <p class="text-muted mt-2 mb-0">Search, filter, sort and explore the latest drops.</p>
+                <div class="eyebrow" th:text="#{home.shop.collection}">Shop collection</div>
+                <h1 class="display-5 fw-bold mb-0" th:text="#{shop.find.sneaker}">Find your next sneaker</h1>
+                <p class="text-muted mt-2 mb-0" th:text="#{shop.search.filter}">Search, filter, sort and explore the latest drops.</p>
             </div>
             <div class="col-lg-4">
                 <form class="search-bar" method="get" th:action="@{/shop}">
-                    <input type="text" class="form-control" name="keyword" placeholder="Search shoes..." th:value="${keyword}">
+                    <input type="text" class="form-control" name="keyword" th:placeholder="#{shop.search.shoes}" th:value="${keyword}">
                     <button class="btn btn-accent"><i class="bi bi-search"></i></button>
                 </form>
             </div>
@@ -143,6 +143,7 @@
 <div th:replace="~{fragments/site :: footer}"></div>
 <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
 <script th:replace="~{fragments/site :: toastScript}"></script>
+<script th:replace="~{fragments/site :: langScript}"></script>
 <script th:src="@{/js/animations.js}"></script>
 </body>
 </html>

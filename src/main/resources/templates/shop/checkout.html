@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ShoeHouse | Checkout</title>
+    <title>ShoeHouse | <span th:text="#{checkout.title}">Checkout</span></title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
     <link th:href="@{/webjars/bootstrap-icons/font/bootstrap-icons.css}" rel="stylesheet">
@@ -17,25 +17,25 @@
     <div class="row g-4">
         <div class="col-lg-7">
             <div class="panel-card">
-                <h3 class="fw-bold mb-4">Checkout details</h3>
+                <h3 class="fw-bold mb-4" th:text="#{checkout.title}">Checkout</h3>
                 <form th:action="@{/checkout}" method="post" th:object="${form}" class="d-grid gap-3">
                     <div>
-                        <label class="form-label">Full name</label>
+                        <label class="form-label" th:text="#{checkout.name}">Full name</label>
                         <input class="form-control" th:field="*{customerName}">
                         <small class="text-danger" th:errors="*{customerName}"></small>
                     </div>
                     <div>
-                        <label class="form-label">Phone</label>
+                        <label class="form-label" th:text="#{checkout.phone}">Phone</label>
                         <input class="form-control" th:field="*{phone}">
                         <small class="text-danger" th:errors="*{phone}"></small>
                     </div>
                     <div>
-                        <label class="form-label">Address</label>
+                        <label class="form-label" th:text="#{checkout.address}">Address</label>
                         <textarea class="form-control" rows="3" th:field="*{address}"></textarea>
                         <small class="text-danger" th:errors="*{address}"></small>
                     </div>
                     <div>
-                        <label class="form-label">Coupon code</label>
+                        <label class="form-label" th:text="#{cart.coupon}">Coupon code</label>
                         <input class="form-control" th:field="*{couponCode}" placeholder="NIKE10">
                         <small class="text-danger" th:errors="*{couponCode}"></small>
                         <small class="text-muted" th:if="${couponQuote != null}" th:text="'Applied: ' + ${couponQuote.title}"></small>
@@ -43,7 +43,7 @@
                     </div>
                     <!-- Payment Methods -->
                     <div>
-                        <label class="form-label fw-semibold mb-3">Payment method</label>
+                        <label class="form-label fw-semibold mb-3" th:text="#{checkout.payment.method}">Payment method</label>
                         <div class="payment-methods d-grid gap-3">
                             <!-- COD -->
                             <label class="payment-option">
@@ -51,8 +51,8 @@
                                 <div class="payment-card">
                                     <div class="payment-icon" style="background:linear-gradient(135deg,#22c55e,#16a34a)"><i class="bi bi-cash"></i></div>
                                     <div class="payment-info">
-                                        <strong>Cash on Delivery</strong>
-                                        <small>Pay when you receive</small>
+                                        <strong th:text="#{checkout.cod}">Cash on Delivery</strong>
+                                        <small th:text="#{checkout.cod.desc}">Pay when you receive</small>
                                     </div>
                                     <i class="bi bi-check-circle-fill payment-check"></i>
                                 </div>
@@ -64,8 +64,8 @@
                                 <div class="payment-card">
                                     <div class="payment-icon" style="background:linear-gradient(135deg,#005baa,#003d7a)"><i class="bi bi-bank"></i></div>
                                     <div class="payment-info">
-                                        <strong>Bank Transfer</strong>
-                                        <small>QR Code / Internet Banking</small>
+                                        <strong th:text="#{checkout.bank}">Bank Transfer</strong>
+                                        <small th:text="#{checkout.bank.desc}">QR Code / Internet Banking</small>
                                     </div>
                                     <i class="bi bi-check-circle-fill payment-check"></i>
                                 </div>
@@ -79,7 +79,7 @@
                             <div class="invoice-header">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div>
-                                        <div class="eyebrow">Invoice Preview</div>
+                                        <div class="eyebrow" th:text="#{checkout.invoice.preview}">Invoice Preview</div>
                                         <h5 class="fw-bold mb-0" id="invoiceCode">INV-XXXXXX</h5>
                                     </div>
                                     <span class="badge bg-warning text-dark" id="invoiceStatus">PENDING</span>
@@ -87,15 +87,15 @@
                             </div>
                             <div class="invoice-body">
                                 <div class="d-flex justify-content-between mb-2">
-                                    <span class="text-muted">Subtotal</span>
+                                    <span class="text-muted" th:text="#{cart.subtotal}">Subtotal</span>
                                     <span th:text="${#numbers.formatDecimal(subtotal,0,'COMMA',0,'POINT')} + ' đ'"></span>
                                 </div>
                                 <div class="d-flex justify-content-between mb-2 text-success" th:if="${discountAmount > 0}">
-                                    <span class="text-muted">Discount</span>
+                                    <span class="text-muted" th:text="#{cart.discount}">Discount</span>
                                     <span>-<span th:text="${#numbers.formatDecimal(discountAmount,0,'COMMA',0,'POINT')} + ' đ'"></span></span>
                                 </div>
                                 <div class="d-flex justify-content-between pt-3 border-top">
-                                    <span class="fw-semibold">Total Amount</span>
+                                    <span class="fw-semibold" th:text="#{checkout.total.amount}">Total Amount</span>
                                     <span class="fw-bold fs-5 gradient-text" th:text="${#numbers.formatDecimal(grandTotal,0,'COMMA',0,'POINT')} + ' đ'"></span>
                                 </div>
                             </div>
@@ -131,7 +131,7 @@
                         </div>
                     </div>
 
-                    <button class="btn btn-accent btn-lg rounded-pill mt-4 w-100">
+                    <button class="btn btn-accent btn-lg rounded-pill mt-4 w-100" th:text="#{checkout.place.order}">
                         <i class="bi bi-shield-check me-2"></i>Place order securely
                     </button>
                 </form>
@@ -139,7 +139,7 @@
         </div>
         <div class="col-lg-5">
             <div class="summary-card">
-                <h4 class="fw-bold mb-3">Your order</h4>
+                <h4 class="fw-bold mb-3" th:text="#{checkout.your.order}">Your order</h4>
                 <div class="mini-order" th:each="item : ${cartItems}">
                     <img th:src="${item.imageUrl}" class="mini-thumb" alt="">
                     <div class="flex-grow-1">
@@ -167,6 +167,7 @@
 <div th:replace="~{fragments/site :: footer}"></div>
 <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
 <script th:replace="~{fragments/site :: toastScript}"></script>
+<script th:replace="~{fragments/site :: langScript}"></script>
 <script th:src="@{/js/animations.js}"></script>
 
 <style>

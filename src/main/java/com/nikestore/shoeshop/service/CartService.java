@@ -27,28 +27,39 @@ public class CartService {
     public void add(HttpSession session, Product product, int quantity, String size) {
         Map<Long, CartItemView> cart = cart(session);
         CartItemView item = cart.get(product.getId());
+        int requestedQty = Math.max(quantity, 1);
+        int stock = product.getStock() != null ? product.getStock() : 0;
+
         if (item == null) {
+            // New item: cap at stock limit
+            int finalQty = Math.min(requestedQty, stock);
             item = new CartItemView(
                     product.getId(),
                     product.getName(),
                     product.getSlug(),
                     product.getImageUrl(),
                     product.effectivePrice(),
-                    Math.max(quantity, 1),
+                    finalQty,
                     size
             );
             cart.put(product.getId(), item);
         } else {
-            item.setQuantity(item.getQuantity() + Math.max(quantity, 1));
+            // Existing item: add quantity but cap at stock limit
+            int newQty = item.getQuantity() + requestedQty;
+            int finalQty = Math.min(newQty, stock);
+            item.setQuantity(finalQty);
             item.setSize(size);
         }
     }
 
-    public void update(HttpSession session, Long productId, int quantity, String size) {
+    public void update(HttpSession session, Long productId, int quantity, String size, Product product) {
         Map<Long, CartItemView> cart = cart(session);
         CartItemView item = cart.get(productId);
-        if (item != null) {
-            item.setQuantity(Math.max(quantity, 1));
+        if (item != null && product != null) {
+            int requestedQty = Math.max(quantity, 1);
+            int stock = product.getStock() != null ? product.getStock() : 0;
+            int finalQty = Math.min(requestedQty, stock);
+            item.setQuantity(finalQty);
             item.setSize(size);
         }
     }

@@ -64,7 +64,8 @@ public class CartController {
 
     @PostMapping("/cart/update")
     public String updateCart(@RequestParam Long productId, @RequestParam int quantity, @RequestParam String size, HttpSession session, RedirectAttributes redirectAttributes) {
-        cartService.update(session, productId, quantity, size);
+        var product = catalogService.requireProductById(productId);
+        cartService.update(session, productId, quantity, size, product);
         redirectAttributes.addFlashAttribute("success", "Cart updated successfully!");
         return "redirect:/cart";
     }
@@ -95,18 +96,21 @@ public class CartController {
     }
 
     @GetMapping("/checkout")
-    public String checkout(HttpSession session, Model model, Authentication authentication) {
+    public String checkout(HttpSession session, Model model, Authentication authentication, RedirectAttributes redirectAttributes) {
+        // Require login
+        if (authentication == null || !authentication.isAuthenticated()) {
+            redirectAttributes.addFlashAttribute("error", "Please login to proceed with checkout.");
+            return "redirect:/signin";
+        }
         if (cartService.count(session) == 0) {
             return "redirect:/shop";
         }
         CheckoutForm form = new CheckoutForm();
-        if (authentication != null && authentication.isAuthenticated()) {
-            var user = userRepository.findByEmail(authentication.getName()).orElse(null);
-            if (user != null) {
-                form.setCustomerName(user.getFullName());
-                form.setPhone(user.getPhone() != null ? user.getPhone() : "");
-                form.setAddress(user.getAddress() != null ? user.getAddress() : "");
-            }
+        var user = userRepository.findByEmail(authentication.getName()).orElse(null);
+        if (user != null) {
+            form.setCustomerName(user.getFullName());
+            form.setPhone(user.getPhone() != null ? user.getPhone() : "");
+            form.setAddress(user.getAddress() != null ? user.getAddress() : "");
         }
         form.setCouponCode(couponCode(session));
 
@@ -126,6 +130,11 @@ public class CartController {
                              Authentication authentication,
                              Model model,
                              RedirectAttributes redirectAttributes) {
+        // Require login
+        if (authentication == null || !authentication.isAuthenticated()) {
+            redirectAttributes.addFlashAttribute("error", "Please login to place an order.");
+            return "redirect:/signin";
+        }
         if (cartService.count(session) == 0) {
             return "redirect:/shop";
         }
@@ -139,7 +148,7 @@ public class CartController {
             populateSummary(model, session, subtotal, form.getCouponCode(), couponQuote);
             return "shop/checkout";
         }
-        String email = authentication != null ? authentication.getName() : "guest@example.com";
+        String email = authentication.getName();
         CustomerOrder order = orderService.createOrder(form, cartService.items(session), email, couponQuote);
         cartService.clear(session);
         session.removeAttribute(COUPON_KEY);
