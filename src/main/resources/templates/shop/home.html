@@ -13,31 +13,43 @@
     <link rel="stylesheet" th:href="@{/css/site.css}">
 </head>
 <body>
+<div th:replace="~{fragments/site :: toast}"></div>
 <div th:replace="~{fragments/site :: header}"></div>
 
 <section class="hero hero-home">
+    <!-- Floating particles decoration -->
+    <div class="hero-particles" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span>
+    </div>
     <div class="container py-5 py-lg-6">
         <div class="row align-items-center g-5">
-            <div class="col-lg-6">
-                <div class="eyebrow">New season drop</div>
-                <h1 class="display-3 fw-black lh-1 mt-3">Own the run.<br>Own the street.</h1>
-                <p class="lead text-white-50 mt-4 pe-lg-5">
+            <div class="col-lg-6 hero-content">
+                <div class="eyebrow reveal">New season drop</div>
+                <h1 class="display-3 fw-black lh-1 mt-3 reveal" style="animation-delay:0.1s">
+                    Own the run.<br>Own the street.
+                </h1>
+                <p class="lead text-white-50 mt-4 pe-lg-5 reveal" style="animation-delay:0.2s">
                     Premium sneaker drops with a sharp athletic feel, inspired by the best modern sportswear stores.
                     Discover lifestyle, running and court models in one place.
                 </p>
-                <div class="d-flex flex-wrap gap-3 mt-4">
-                    <a class="btn btn-accent btn-lg rounded-pill px-4" th:href="@{/shop}">Shop collection</a>
-                    <a class="btn btn-outline-light btn-lg rounded-pill px-4" th:href="@{/wishlist}">View wishlist</a>
+                <div class="d-flex flex-wrap gap-3 mt-4 reveal" style="animation-delay:0.3s">
+                    <a class="btn btn-accent btn-lg rounded-pill px-4" th:href="@{/shop}">
+                        <i class="bi bi-bag me-2"></i>Shop collection
+                    </a>
+                    <a class="btn btn-outline-light btn-lg rounded-pill px-4" th:href="@{/wishlist}">
+                        <i class="bi bi-heart me-2"></i>Wishlist
+                    </a>
                 </div>
-                <div class="hero-stats mt-5">
+                <div class="hero-stats mt-5 reveal" style="animation-delay:0.4s">
                     <div><strong>10+</strong><span>Hot picks</span></div>
                     <div><strong>5</strong><span>Brands</span></div>
                     <div><strong>5</strong><span>Categories</span></div>
                 </div>
             </div>
-            <div class="col-lg-6 text-center">
-                <div class="hero-card">
-                    <img th:src="@{/img/hero-shoe.svg}" class="img-fluid hero-illustration" alt="hero">
+            <div class="col-lg-6 text-center reveal" style="animation-delay:0.3s">
+                <div class="hero-card" id="heroCard">
+                    <div class="hero-shoe-glow"></div>
+                    <img th:src="@{/img/hero-shoe.svg}" class="img-fluid hero-illustration" alt="Premium Sneakers">
                 </div>
             </div>
         </div>
@@ -165,5 +177,7 @@
 
 <div th:replace="~{fragments/site :: footer}"></div>
 <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:replace="~{fragments/site :: toastScript}"></script>
+<script th:src="@{/js/animations.js}"></script>
 </body>
 </html>

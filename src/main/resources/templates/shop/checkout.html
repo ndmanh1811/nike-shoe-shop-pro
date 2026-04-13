@@ -10,6 +10,7 @@
     <link rel="stylesheet" th:href="@{/css/site.css}">
 </head>
 <body>
+<div th:replace="~{fragments/site :: toast}"></div>
 <div th:replace="~{fragments/site :: header}"></div>
 
 <section class="container py-5">
@@ -18,7 +19,6 @@
             <div class="panel-card">
                 <h3 class="fw-bold mb-4">Checkout details</h3>
                 <form th:action="@{/checkout}" method="post" th:object="${form}" class="d-grid gap-3">
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                     <div>
                         <label class="form-label">Full name</label>
                         <input class="form-control" th:field="*{customerName}">
@@ -41,14 +41,99 @@
                         <small class="text-muted" th:if="${couponQuote != null}" th:text="'Applied: ' + ${couponQuote.title}"></small>
                         <small class="text-danger" th:if="${couponQuote == null and form.couponCode != null and !#strings.isEmpty(form.couponCode)}">Coupon is invalid or not eligible.</small>
                     </div>
+                    <!-- Payment Methods -->
                     <div>
-                        <label class="form-label">Payment method</label>
-                        <select class="form-select" th:field="*{paymentMethod}">
-                            <option value="COD">Cash on delivery</option>
-                            <option value="ONLINE">Online payment</option>
-                        </select>
+                        <label class="form-label fw-semibold mb-3">Payment method</label>
+                        <div class="payment-methods d-grid gap-3">
+                            <!-- COD -->
+                            <label class="payment-option">
+                                <input type="radio" name="paymentMethod" value="COD" th:field="*{paymentMethod}" checked onchange="togglePayment('COD')">
+                                <div class="payment-card">
+                                    <div class="payment-icon" style="background:linear-gradient(135deg,#22c55e,#16a34a)"><i class="bi bi-cash"></i></div>
+                                    <div class="payment-info">
+                                        <strong>Cash on Delivery</strong>
+                                        <small>Pay when you receive</small>
+                                    </div>
+                                    <i class="bi bi-check-circle-fill payment-check"></i>
+                                </div>
+                            </label>
+                            
+                            <!-- Bank Transfer -->
+                            <label class="payment-option">
+                                <input type="radio" name="paymentMethod" value="BANK" th:field="*{paymentMethod}" onchange="togglePayment('BANK')">
+                                <div class="payment-card">
+                                    <div class="payment-icon" style="background:linear-gradient(135deg,#005baa,#003d7a)"><i class="bi bi-bank"></i></div>
+                                    <div class="payment-info">
+                                        <strong>Bank Transfer</strong>
+                                        <small>QR Code / Internet Banking</small>
+                                    </div>
+                                    <i class="bi bi-check-circle-fill payment-check"></i>
+                                </div>
+                            </label>
+                        </div>
                     </div>
-                    <button class="btn btn-accent btn-lg rounded-pill">Place order</button>
+
+                    <!-- Invoice Preview -->
+                    <div id="invoiceSection" class="invoice-section mt-4">
+                        <div class="invoice-card">
+                            <div class="invoice-header">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <div class="eyebrow">Invoice Preview</div>
+                                        <h5 class="fw-bold mb-0" id="invoiceCode">INV-XXXXXX</h5>
+                                    </div>
+                                    <span class="badge bg-warning text-dark" id="invoiceStatus">PENDING</span>
+                                </div>
+                            </div>
+                            <div class="invoice-body">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Subtotal</span>
+                                    <span th:text="${#numbers.formatDecimal(subtotal,0,'COMMA',0,'POINT')} + ' đ'"></span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2 text-success" th:if="${discountAmount > 0}">
+                                    <span class="text-muted">Discount</span>
+                                    <span>-<span th:text="${#numbers.formatDecimal(discountAmount,0,'COMMA',0,'POINT')} + ' đ'"></span></span>
+                                </div>
+                                <div class="d-flex justify-content-between pt-3 border-top">
+                                    <span class="fw-semibold">Total Amount</span>
+                                    <span class="fw-bold fs-5 gradient-text" th:text="${#numbers.formatDecimal(grandTotal,0,'COMMA',0,'POINT')} + ' đ'"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- QR Code Section (Bank only) -->
+                    <div id="qrSection" class="qr-section" style="display:none">
+                        <div class="qr-card">
+                            <div class="text-center mb-3">
+                                <i class="bi bi-qr-code-scan fs-1 gradient-text"></i>
+                                <h5 class="fw-bold mt-2">Scan to Pay</h5>
+                                <p class="text-muted small mb-0">Use your banking app to scan QR code</p>
+                            </div>
+                            <div class="qr-code-wrapper">
+                                <img id="qrImage" src="" alt="Payment QR Code" class="qr-image">
+                                <div class="qr-amount">
+                                    <span class="text-muted">Amount to transfer:</span>
+                                    <strong class="fs-5 text-dark" th:text="${#numbers.formatDecimal(grandTotal,0,'COMMA',0,'POINT')} + ' đ'"></strong>
+                                </div>
+                                <div class="mt-3 p-3 bg-light rounded-3">
+                                    <small class="text-muted d-block mb-1"><i class="bi bi-info-circle me-1"></i>Transfer details:</small>
+                                    <div class="d-flex justify-content-between"><span>Bank:</span><strong>Vietcombank</strong></div>
+                                    <div class="d-flex justify-content-between"><span>Account:</span><strong>1234567890</strong></div>
+                                    <div class="d-flex justify-content-between"><span>Holder:</span><strong>SHOEHOUSE Co.</strong></div>
+                                    <div class="d-flex justify-content-between"><span>Content:</span><strong id="transferContent">Payment Order</strong></div>
+                                </div>
+                            </div>
+                            <div class="qr-timer mt-3">
+                                <i class="bi bi-clock"></i>
+                                <span>QR expires in <strong id="countdown">15:00</strong></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-accent btn-lg rounded-pill mt-4 w-100">
+                        <i class="bi bi-shield-check me-2"></i>Place order securely
+                    </button>
                 </form>
             </div>
         </div>
@@ -81,5 +166,175 @@
 
 <div th:replace="~{fragments/site :: footer}"></div>
 <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:replace="~{fragments/site :: toastScript}"></script>
+<script th:src="@{/js/animations.js}"></script>
+
+<style>
+/* Payment Methods Styling */
+.payment-option{position:relative;cursor:pointer;margin:0}
+.payment-option input{position:absolute;opacity:0;width:0;height:0}
+.payment-card{
+  display:flex;align-items:center;gap:16px;
+  padding:18px 20px;border-radius:20px;
+  background:linear-gradient(145deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.03) 100%);
+  border:2px solid transparent;
+  transition:all .3s cubic-bezier(.4,0,.2,1);
+}
+.payment-option:hover .payment-card{
+  background:linear-gradient(145deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,.06) 100%);
+  transform:translateX(8px);
+}
+.payment-option input:checked + .payment-card{
+  border-color:var(--accent, #ff5a2a);
+  background:linear-gradient(145deg, rgba(255,90,42,.1) 0%, rgba(255,90,42,.05) 100%);
+  box-shadow:0 8px 32px rgba(255,90,42,.2);
+}
+.payment-icon{
+  width:52px;height:52px;border-radius:16px;
+  background:linear-gradient(135deg, #4ade80, #22c55e);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:1.4rem;flex-shrink:0;
+  box-shadow:0 8px 24px rgba(0,0,0,.2);
+}
+.payment-info{flex:1}
+.payment-info strong{display:block;color:#fff;font-weight:600}
+.payment-info small{color:rgba(255,255,255,.6)}
+.payment-check{
+  color:var(--accent, #ff5a2a);
+  font-size:1.5rem;opacity:0;transform:scale(.8);
+  transition:all .3s ease;
+}
+.payment-option input:checked + .payment-card .payment-check{
+  opacity:1;transform:scale(1);
+}
+
+/* QR Section */
+.qr-section{animation:fadeInUp .5s ease}
+.qr-card{
+  background:linear-gradient(145deg, rgba(255,255,255,.1) 0%, rgba(255,255,255,.05) 100%);
+  border:2px solid rgba(255,90,42,.3);
+  border-radius:28px;padding:28px;
+  box-shadow:0 12px 40px rgba(255,90,42,.15);
+}
+.qr-code-wrapper{
+  background:#fff;border-radius:20px;padding:20px;
+  text-align:center;
+}
+.qr-image{
+  width:200px;height:200px;border-radius:12px;
+  box-shadow:0 8px 24px rgba(0,0,0,.1);
+}
+.qr-amount{
+  margin-top:16px;padding-top:16px;
+  border-top:1px dashed rgba(0,0,0,.1);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.qr-timer{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  color:rgba(255,255,255,.7);font-size:.9rem;
+}
+.qr-timer i{color:var(--accent, #ff5a2a)}
+
+@keyframes fadeInUp{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+</style>
+
+<script th:inline="javascript">
+// Payment Logic
+var grandTotal = /*[[${grandTotal}]]*/ 0;
+var orderId = 'ORD' + Date.now();
+
+function togglePayment(method) {
+    const qrSection = document.getElementById('qrSection');
+    const invoiceCode = document.getElementById('invoiceCode');
+    const invoiceStatus = document.getElementById('invoiceStatus');
+    const transferContent = document.getElementById('transferContent');
+    const qrImage = document.getElementById('qrImage');
+    
+    // Update invoice preview
+    invoiceCode.textContent = 'INV-' + orderId.substring(4);
+    
+    if (method === 'BANK') {
+        qrSection.style.display = 'block';
+        invoiceStatus.textContent = 'AWAITING PAYMENT';
+        invoiceStatus.className = 'badge bg-info';
+        transferContent.textContent = 'Payment ' + orderId;
+        
+        // Generate QR code with bank transfer info
+        var qrData = '2|99|1234567890|SHOEHOUSE Co.|0|0|' + grandTotal + '|Payment ' + orderId + '|transfer';
+        var qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(qrData);
+        qrImage.src = qrUrl;
+        
+        // Start countdown
+        startCountdown();
+    } else {
+        qrSection.style.display = 'none';
+        invoiceStatus.textContent = 'COD - PAY ON DELIVERY';
+        invoiceStatus.className = 'badge bg-warning text-dark';
+        if (window.qrTimer) clearInterval(window.qrTimer);
+    }
+}
+
+function startCountdown() {
+    var minutes = 15;
+    var seconds = 0;
+    var countdownEl = document.getElementById('countdown');
+    
+    if (window.qrTimer) clearInterval(window.qrTimer);
+    
+    window.qrTimer = setInterval(function() {
+        if (seconds === 0) {
+            if (minutes === 0) {
+                clearInterval(window.qrTimer);
+                countdownEl.innerHTML = '<span class="text-danger">Expired - Refresh to generate new QR</span>';
+                return;
+            }
+            minutes--;
+            seconds = 59;
+        } else {
+            seconds--;
+        }
+        
+        var mm = minutes.toString().padStart(2, '0');
+        var ss = seconds.toString().padStart(2, '0');
+        countdownEl.textContent = mm + ':' + ss;
+    }, 1000);
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    var selectedPayment = document.querySelector('input[name="paymentMethod"]:checked');
+    if (selectedPayment) {
+        togglePayment(selectedPayment.value);
+    }
+});
+</script>
+
+<style>
+/* Invoice Preview */
+.invoice-card{
+  background:linear-gradient(145deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.02) 100%);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:24px;
+  overflow:hidden;
+}
+.invoice-header{
+  background:linear-gradient(135deg, rgba(255,90,42,.15) 0%, rgba(255,90,42,.05) 100%);
+  padding:20px 24px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.invoice-body{
+  padding:24px;
+  color:#fff;
+}
+.gradient-text{
+  background:linear-gradient(135deg, #ff5a2a, #ff7b52);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+</style>
+
 </body>
 </html>

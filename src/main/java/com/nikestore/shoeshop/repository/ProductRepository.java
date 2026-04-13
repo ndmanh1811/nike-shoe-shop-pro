@@ -13,5 +13,5 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findAllByActiveTrueOrderByCreatedAtDesc();
     boolean existsBySlug(String slug);
 
-    Object findByNameContainingIgnoreCase(String keyword);
+    List<Product> findByNameContainingIgnoreCase(String keyword);
 }

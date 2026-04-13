@@ -17,10 +17,12 @@ public class DataSeeder {
             BrandRepository brandRepository,
             ProductRepository productRepository,
             CustomerOrderRepository orderRepository,
+            OrderStatusHistoryRepository statusHistoryRepository,
             PasswordEncoder passwordEncoder
     ) {
         return args -> {
-            if (userRepository.count() > 0) {
+            // Only seed if database is completely empty
+            if (userRepository.count() > 0 || categoryRepository.count() > 0 || brandRepository.count() > 0) {
                 return;
             }
 
@@ -126,6 +128,10 @@ public class DataSeeder {
                 i2.setSubtotal(2690000d);
                 o1.addItem(i2);
                 orderRepository.save(o1);
+                // Create status history for o1
+                statusHistoryRepository.save(new OrderStatusHistory(o1, OrderStatus.PENDING, "Order placed, cash on delivery"));
+                statusHistoryRepository.save(new OrderStatusHistory(o1, OrderStatus.PAID, "Payment confirmed on delivery"));
+                statusHistoryRepository.save(new OrderStatusHistory(o1, OrderStatus.COMPLETED, "Order completed successfully"));
 
                 CustomerOrder o2 = new CustomerOrder();
                 o2.setOrderCode("NK-DEMO-02");
@@ -147,6 +153,9 @@ public class DataSeeder {
                 i3.setSubtotal(4990000d);
                 o2.addItem(i3);
                 orderRepository.save(o2);
+                // Create status history for o2
+                statusHistoryRepository.save(new OrderStatusHistory(o2, OrderStatus.PENDING, "Order placed, awaiting online payment"));
+                statusHistoryRepository.save(new OrderStatusHistory(o2, OrderStatus.PAID, "Online payment received"));
             }
         };
     }

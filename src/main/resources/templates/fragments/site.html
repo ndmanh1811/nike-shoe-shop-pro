@@ -1,6 +1,51 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
+
+<!-- Toast Notifications Container -->
+<div th:fragment="toast" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+    <!-- Success Toast -->
+    <div th:if="${success}" class="toast align-items-center text-bg-success border-0 show" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="bi bi-check-circle me-2"></i>
+                <span th:text="${success}">Operation successful!</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+    <!-- Error Toast -->
+    <div th:if="${error}" class="toast align-items-center text-bg-danger border-0 show" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="bi bi-exclamation-circle me-2"></i>
+                <span th:text="${error}">An error occurred!</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+    <!-- Warning Toast -->
+    <div th:if="${warning}" class="toast align-items-center text-bg-warning border-0 show" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="4000">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <span th:text="${warning}">Warning!</span>
+            </div>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+    <!-- Info Toast -->
+    <div th:if="${info}" class="toast align-items-center text-bg-info border-0 show" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="bi bi-info-circle me-2"></i>
+                <span th:text="${info}">Information</span>
+            </div>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
 <header th:fragment="header">
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top border-bottom border-secondary"
          style="background: rgba(10,10,10,.92); backdrop-filter: blur(14px);">
@@ -42,7 +87,7 @@
                 </div>
 
                 <div class="d-flex align-items-center gap-2" th:unless="${loggedIn}">
-                    <a class="btn btn-outline-light btn-sm rounded-pill px-3" th:href="@{/login}">Login</a>
+                    <a class="btn btn-outline-light btn-sm rounded-pill px-3" th:href="@{/signin}">Login</a>
                     <a class="btn btn-light btn-sm rounded-pill px-3" th:href="@{/register}">Register</a>
                 </div>
             </div>
@@ -67,7 +112,7 @@
                         <li><a th:href="@{/shop}">Shop</a></li>
                         <li><a th:href="@{/wishlist}">Wishlist</a></li>
                         <li><a th:href="@{/cart}">Cart</a></li>
-                        <li><a th:href="@{/login}">Login</a></li>
+                        <li><a th:href="@{/signin}">Login</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-4">
@@ -85,5 +130,20 @@
         </div>
     </div>
 </footer>
+
+<!-- Toast Auto-Hide Script -->
+<script th:fragment="toastScript">
+    document.addEventListener('DOMContentLoaded', function() {
+        var toasts = document.querySelectorAll('.toast');
+        toasts.forEach(function(toast) {
+            var delay = toast.getAttribute('data-bs-delay') || 3000;
+            setTimeout(function() {
+                var bsToast = bootstrap.Toast.getOrCreateInstance(toast);
+                bsToast.hide();
+            }, parseInt(delay));
+        });
+    });
+</script>
+
 </body>
 </html>

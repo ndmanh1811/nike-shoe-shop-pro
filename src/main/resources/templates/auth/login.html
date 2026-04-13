@@ -9,6 +9,7 @@
     <link rel="stylesheet" th:href="@{/css/site.css}">
 </head>
 <body class="auth-bg">
+<div th:replace="~{fragments/site :: toast}"></div>
 <section class="auth-shell">
     <div class="auth-card">
         <div class="mb-4 text-center">
@@ -18,7 +19,7 @@
         </div>
 
         <div class="alert alert-danger" th:if="${param.error}">Invalid email or password.</div>
-        <div class="alert alert-success" th:if="${param.registered}">Registration successful. Please login.</div>
+        <div class="alert alert-success" th:if="${success}" th:text="${success}">Registration successful. Please login.</div>
         <div class="alert alert-info" th:if="${param.logout}">You have been logged out.</div>
 
         <form th:action="@{/login}" method="post" class="d-grid gap-3">
@@ -45,5 +46,6 @@
     </div>
 </section>
 <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:replace="~{fragments/site :: toastScript}"></script>
 </body>
 </html>

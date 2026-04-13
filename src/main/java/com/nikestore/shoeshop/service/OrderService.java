@@ -5,6 +5,7 @@ import com.nikestore.shoeshop.dto.CheckoutForm;
 import com.nikestore.shoeshop.entity.*;
 import com.nikestore.shoeshop.repository.AppUserRepository;
 import com.nikestore.shoeshop.repository.CustomerOrderRepository;
+import com.nikestore.shoeshop.repository.OrderStatusHistoryRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,10 +18,12 @@ public class OrderService {
 
     private final CustomerOrderRepository orderRepository;
     private final AppUserRepository userRepository;
+    private final OrderStatusHistoryRepository statusHistoryRepository;
 
-    public OrderService(CustomerOrderRepository orderRepository, AppUserRepository userRepository) {
+    public OrderService(CustomerOrderRepository orderRepository, AppUserRepository userRepository, OrderStatusHistoryRepository statusHistoryRepository) {
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
+        this.statusHistoryRepository = statusHistoryRepository;
     }
 
     @Transactional
@@ -31,7 +34,9 @@ public class OrderService {
         order.setPhone(form.getPhone());
         order.setAddress(form.getAddress());
         order.setEmail(email);
-        order.setPaymentMethod("ONLINE".equalsIgnoreCase(form.getPaymentMethod()) ? PaymentMethod.ONLINE : PaymentMethod.COD);
+        // Parse payment method: COD or BANK
+        PaymentMethod paymentMethod = "BANK".equalsIgnoreCase(form.getPaymentMethod()) ? PaymentMethod.BANK : PaymentMethod.COD;
+        order.setPaymentMethod(paymentMethod);
         order.setStatus(OrderStatus.PENDING);
 
         double subtotal = 0d;
@@ -52,7 +57,33 @@ public class OrderService {
         order.setDiscountAmount(discount);
         order.setCouponCode(couponQuote != null ? couponQuote.getCode() : null);
         order.setTotalAmount(Math.max(0d, subtotal - discount));
-        return orderRepository.save(order);
+        CustomerOrder savedOrder = orderRepository.save(order);
+
+        // Create initial status history
+        String note = paymentMethod == PaymentMethod.BANK ? "Order placed, awaiting bank transfer" : "Order placed, cash on delivery";
+        createStatusHistory(savedOrder, OrderStatus.PENDING, note);
+
+        return savedOrder;
+    }
+
+    @Transactional
+    public void updateOrderStatus(Long orderId, OrderStatus newStatus, String note) {
+        CustomerOrder order = requireOrder(orderId);
+        OrderStatus oldStatus = order.getStatus();
+        order.setStatus(newStatus);
+        orderRepository.save(order);
+
+        String statusNote = note != null ? note : "Status changed from " + oldStatus + " to " + newStatus;
+        createStatusHistory(order, newStatus, statusNote);
+    }
+
+    private void createStatusHistory(CustomerOrder order, OrderStatus status, String note) {
+        OrderStatusHistory history = new OrderStatusHistory(order, status, note);
+        statusHistoryRepository.save(history);
+    }
+
+    public List<OrderStatusHistory> getOrderStatusHistory(Long orderId) {
+        return statusHistoryRepository.findByOrderIdOrderByCreatedAtAsc(orderId);
     }
 
     public List<CustomerOrder> ordersForEmail(String email) {
