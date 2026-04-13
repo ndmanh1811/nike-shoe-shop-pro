@@ -28,6 +28,7 @@ public class AdminUserController {
     @GetMapping("/{id}/edit")
     public String edit(@PathVariable Long id, Model model) {
         AppUser user = userRepository.findById(id).orElseThrow();
+
         UserForm form = new UserForm();
         form.setId(user.getId());
         form.setEmail(user.getEmail());
@@ -36,6 +37,7 @@ public class AdminUserController {
         form.setAddress(user.getAddress());
         form.setRole(user.getRole().name());
         form.setEnabled(user.isEnabled());
+
         model.addAttribute("form", form);
         return "admin/user-form";
     }
@@ -43,11 +45,23 @@ public class AdminUserController {
     @PostMapping("/save")
     public String save(@Valid @ModelAttribute("form") UserForm form) {
         AppUser user = userRepository.findById(form.getId()).orElseThrow();
+
         user.setFullName(form.getFullName());
         user.setPhone(form.getPhone());
         user.setAddress(form.getAddress());
         user.setRole(AppRole.valueOf(form.getRole()));
         user.setEnabled(form.isEnabled());
+
+        userRepository.save(user);
+
+        return "redirect:/admin/users";
+    }
+
+    // 🔥 TOGGLE KHÓA USER NHANH
+    @PostMapping("/{id}/toggle")
+    public String toggle(@PathVariable Long id) {
+        AppUser user = userRepository.findById(id).orElseThrow();
+        user.setEnabled(!user.isEnabled());
         userRepository.save(user);
         return "redirect:/admin/users";
     }
