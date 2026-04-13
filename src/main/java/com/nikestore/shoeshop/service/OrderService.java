@@ -19,11 +19,14 @@ public class OrderService {
     private final CustomerOrderRepository orderRepository;
     private final AppUserRepository userRepository;
     private final OrderStatusHistoryRepository statusHistoryRepository;
+    private final NotificationService notificationService;
 
-    public OrderService(CustomerOrderRepository orderRepository, AppUserRepository userRepository, OrderStatusHistoryRepository statusHistoryRepository) {
+    public OrderService(CustomerOrderRepository orderRepository, AppUserRepository userRepository, 
+                        OrderStatusHistoryRepository statusHistoryRepository, NotificationService notificationService) {
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
         this.statusHistoryRepository = statusHistoryRepository;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -63,6 +66,9 @@ public class OrderService {
         String note = paymentMethod == PaymentMethod.BANK ? "Order placed, awaiting bank transfer" : "Order placed, cash on delivery";
         createStatusHistory(savedOrder, OrderStatus.PENDING, note);
 
+        // Notify admin about new order
+        notificationService.notifyAdminNewOrder(savedOrder);
+
         return savedOrder;
     }
 
@@ -75,6 +81,13 @@ public class OrderService {
 
         String statusNote = note != null ? note : "Status changed from " + oldStatus + " to " + newStatus;
         createStatusHistory(order, newStatus, statusNote);
+
+        // Notify customer if order has email
+        if (order.getEmail() != null && !order.getEmail().isEmpty()) {
+            userRepository.findByEmail(order.getEmail()).ifPresent(user -> {
+                notificationService.notifyCustomerOrderStatusChanged(order, newStatus.name(), user);
+            });
+        }
     }
 
     private void createStatusHistory(CustomerOrder order, OrderStatus status, String note) {

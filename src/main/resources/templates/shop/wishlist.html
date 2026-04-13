@@ -31,7 +31,7 @@
                     <img th:src="${p.imageUrl}" th:alt="${p.name}">
                 </div>
                 <div class="product-body">
-                    <small class="text-uppercase text-white-50" th:text="${p.brand.name}"></small>
+                    <small class="text-uppercase text-white-50" th:if="${p.brand != null}" th:text="${p.brand.name}"></small>
                     <h5 class="mt-1 mb-1 fw-bold clamp-2" th:text="${p.name}"></h5>
                     <div class="price-row mt-3">
                         <span class="price" th:text="${#numbers.formatDecimal(p.effectivePrice(),0,'COMMA',0,'POINT')} + ' đ'"></span>

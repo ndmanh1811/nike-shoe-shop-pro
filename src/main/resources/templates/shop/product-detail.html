@@ -16,13 +16,16 @@
 <section class="container py-5">
     <div class="row g-5 align-items-center">
         <div class="col-lg-6">
-            <div class="product-hero">
+            <div class="product-hero" th:if="${product != null}">
                 <img th:src="${product.imageUrl}" th:alt="${product.name}" class="img-fluid">
+            </div>
+            <div class="product-hero" th:if="${product == null}">
+                <div class="text-center py-5 text-muted">Product not found</div>
             </div>
         </div>
         <div class="col-lg-6">
-            <div class="d-flex align-items-center justify-content-between gap-3">
-                <small class="text-uppercase text-muted" th:text="${product.brand.name}"></small>
+            <div class="d-flex align-items-center justify-content-between gap-3" th:if="${product != null}">
+                <small class="text-uppercase text-muted" th:if="${product.brand != null}" th:text="${product.brand.name}"></small>
                 <form th:action="@{/wishlist/toggle}" method="post">
                     <input type="hidden" name="productId" th:value="${product.id}">
                     <button type="submit" class="btn btn-outline-dark rounded-pill px-3">
@@ -32,22 +35,24 @@
                 </form>
             </div>
 
-            <h1 class="fw-bold display-6 mt-2" th:text="${product.name}"></h1>
-            <p class="text-muted mt-3" th:text="${product.description}"></p>
+            <h1 class="fw-bold display-6 mt-2" th:if="${product != null}" th:text="${product.name}"></h1>
+            <h1 class="fw-bold display-6 mt-2" th:if="${product == null}">Product not found</h1>
+            <p class="text-muted mt-3" th:if="${product != null}" th:text="${product.description}"></p>
 
-            <div class="price-row my-4">
-                <span class="price fs-2" th:text="${#numbers.formatDecimal(product.effectivePrice(),0,'COMMA',0,'POINT')} + ' đ'"></span>
-                <span class="text-decoration-line-through text-muted fs-5" th:if="${product.salePrice != null and product.salePrice > 0 and product.salePrice < product.price}" th:text="${#numbers.formatDecimal(product.price,0,'COMMA',0,'POINT')} + ' đ'"></span>
+            <div class="price-row my-4" th:if="${product != null}">
+                <span class="price fs-2" th:text="${product.effectivePrice()} + ' đ'"></span>
+                <span class="text-decoration-line-through text-muted fs-5" th:if="${product.salePrice != null and product.salePrice > 0 and product.salePrice < product.price}" th:text="${product.price} + ' đ'"></span>
             </div>
 
-            <form th:action="@{/cart/add}" method="post" class="d-grid gap-3">
+            <form th:action="@{/cart/add}" method="post" class="d-grid gap-3" th:if="${product != null}">
                 <input type="hidden" name="productId" th:value="${product.id}">
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label fw-semibold" th:text="#{product.size}">Size</label>
-                        <select name="size" class="form-select">
+                        <select name="size" class="form-select" th:if="${availableSizes != null and !#lists.isEmpty(availableSizes)}">
                             <option th:each="s : ${availableSizes}" th:value="${s}" th:text="${s}" th:selected="${s == '42'}"></option>
                         </select>
+                        <div th:if="${availableSizes == null or #lists.isEmpty(availableSizes)}" class="text-muted">No sizes available</div>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-semibold" th:text="#{product.qty}">Qty</label>
@@ -59,18 +64,21 @@
                     <a th:href="@{/shop}" class="btn btn-outline-dark btn-lg rounded-pill px-4" th:text="#{product.back}">Back</a>
                 </div>
             </form>
+            <div th:if="${product == null}" class="alert alert-warning">
+                Product not found. <a th:href="@{/shop}" class="alert-link">Back to shop</a>
+            </div>
 
-            <div class="mt-4 info-list">
-                <div><strong>Category:</strong> <span th:text="${product.category.name}"></span></div>
+            <div class="mt-4 info-list" th:if="${product != null}">
+                <div th:if="${product.category != null}"><strong>Category:</strong> <span th:text="${product.category.name}"></span></div>
                 <div><strong>Stock:</strong> <span th:text="${product.stock}"></span></div>
-                <div><strong>Sizes:</strong> <span th:text="${product.sizeRange}"></span></div>
-                <div><strong>Brand:</strong> <span th:text="${product.brand.name}"></span></div>
+                <div th:if="${product.sizeRange != null}"><strong>Sizes:</strong> <span th:text="${product.sizeRange}"></span></div>
+                <div th:if="${product.brand != null}"><strong>Brand:</strong> <span th:text="${product.brand.name}"></span></div>
             </div>
         </div>
     </div>
 </section>
 
-<section class="container pb-5" th:if="${not #lists.isEmpty(relatedProducts)}">
+<section class="container pb-5" th:if="${relatedProducts != null and not #lists.isEmpty(relatedProducts)}">
     <div class="section-title mb-4">
         <div class="eyebrow text-dark" th:text="#{product.related.products}">Related products</div>
         <h2 class="fw-bold mb-0" th:text="#{product.you.might.like}">You might also like</h2>
@@ -82,10 +90,10 @@
                     <img th:src="${p.imageUrl}" th:alt="${p.name}">
                 </div>
                 <div class="product-body">
-                    <small class="text-white-50" th:text="${p.brand.name}"></small>
+                    <small class="text-white-50" th:if="${p.brand != null}" th:text="${p.brand.name}"></small>
                     <h6 class="fw-bold mt-1 clamp-2" th:text="${p.name}"></h6>
                     <div class="price-row mt-2">
-                        <span class="price" th:text="${#numbers.formatDecimal(p.effectivePrice(),0,'COMMA',0,'POINT')} + ' đ'"></span>
+                        <span class="price" th:text="${p.effectivePrice()} + ' đ'"></span>
                     </div>
                     <div class="d-flex flex-wrap gap-2 mt-3">
                         <a th:href="@{'/product/' + ${p.slug}}" class="btn btn-light btn-sm rounded-pill flex-grow-1">Details</a>

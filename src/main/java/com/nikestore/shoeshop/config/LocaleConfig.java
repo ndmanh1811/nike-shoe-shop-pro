@@ -9,11 +9,15 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Locale;
 
 @Configuration
 public class LocaleConfig implements WebMvcConfigurer {
+
+    @Autowired
+    private NotificationInterceptor notificationInterceptor;
 
     @Bean
     public MessageSource messageSource() {
@@ -42,5 +46,7 @@ public class LocaleConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         // Đăng ký LocaleChangeInterceptor đầu tiên
         registry.addInterceptor(localeChangeInterceptor()).order(0);
+        // Đăng ký NotificationInterceptor
+        registry.addInterceptor(notificationInterceptor);
     }
 }

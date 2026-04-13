@@ -96,7 +96,7 @@
                             </form>
                         </div>
                         <div class="product-body">
-                            <small class="text-uppercase text-white-50" th:text="${p.brand.name}"></small>
+                            <small class="text-uppercase text-white-50" th:if="${p.brand != null}" th:text="${p.brand.name}"></small>
                             <h5 class="mt-1 mb-1 fw-bold clamp-2" th:text="${p.name}"></h5>
                             <p class="text-white-50 clamp-2 mb-3" th:text="${p.description}"></p>
                             <div class="price-row">

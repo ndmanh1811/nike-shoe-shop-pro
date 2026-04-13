@@ -103,7 +103,7 @@
                 <div class="product-body">
                     <div class="d-flex justify-content-between align-items-start gap-2">
                         <div>
-                            <small class="text-uppercase text-white-50" th:text="${p.brand.name}"></small>
+                            <small class="text-uppercase text-white-50" th:if="${p.brand != null}" th:text="${p.brand.name}"></small>
                             <h5 class="mt-1 mb-1 fw-bold clamp-2" th:text="${p.name}"></h5>
                         </div>
                         <span class="badge rounded-pill text-bg-dark" th:if="${p.featured}">Featured</span>
