@@ -1,4 +1,4 @@
-# ShoeHouse Pro
+# ShoeHouse Pro(database name: shoeshop)
 
 A premium sneaker e-commerce web app built with Spring Boot MVC, Thymeleaf, Spring Security and JPA.
 
