@@ -51,7 +51,8 @@ public class AdminController {
 
     @GetMapping("/admin/orders/{id}")
     public String orderDetail(@PathVariable Long id, Model model) {
-        CustomerOrder order = orderRepository.findById(id).orElseThrow();
+        CustomerOrder order = orderRepository.findById(id)
+                .orElseThrow(() -> new java.util.NoSuchElementException("Order not found: " + id));
         model.addAttribute("order", order);
         model.addAttribute("statuses", OrderStatus.values());
         model.addAttribute("statusHistory", orderService.getOrderStatusHistory(id));

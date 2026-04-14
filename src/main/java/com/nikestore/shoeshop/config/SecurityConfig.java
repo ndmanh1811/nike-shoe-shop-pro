@@ -75,8 +75,7 @@ public class SecurityConfig {
                 session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
         );
 
-        // ❗ disable CSRF cho đơn giản (dev mode)
-        http.csrf(csrf -> csrf.disable());
+        // CSRF enabled for security
 
         return http.build();
     }

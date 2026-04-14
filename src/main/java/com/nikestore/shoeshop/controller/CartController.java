@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -47,6 +48,10 @@ public class CartController {
             HttpSession session,
             RedirectAttributes redirectAttributes
     ) {
+        if (quantity < 1) {
+            redirectAttributes.addFlashAttribute("error", "Quantity must be at least 1.");
+            return "redirect:/cart";
+        }
         cartService.add(session, catalogService.requireProductById(productId), quantity, size);
         redirectAttributes.addFlashAttribute("success", "Added to cart successfully!");
         return "redirect:/cart";
@@ -64,6 +69,10 @@ public class CartController {
 
     @PostMapping("/cart/update")
     public String updateCart(@RequestParam Long productId, @RequestParam int quantity, @RequestParam String size, @RequestParam String oldSize, HttpSession session, RedirectAttributes redirectAttributes) {
+        if (quantity < 1) {
+            redirectAttributes.addFlashAttribute("error", "Quantity must be at least 1.");
+            return "redirect:/cart";
+        }
         var product = catalogService.requireProductById(productId);
         cartService.update(session, productId, quantity, oldSize, size, product);
         redirectAttributes.addFlashAttribute("success", "Cart updated successfully!");
@@ -157,8 +166,14 @@ public class CartController {
     }
 
     @GetMapping("/checkout/success/{orderCode}")
+    @Transactional(readOnly = true)
     public String success(@PathVariable String orderCode, Model model) {
-        model.addAttribute("order", orderService.requireOrderByCode(orderCode));
+        CustomerOrder order = orderService.requireOrderByCode(orderCode);
+        // Force load items trong transaction
+        if (order.getItems() != null) {
+            order.getItems().size();
+        }
+        model.addAttribute("order", order);
         return "shop/order-success";
     }
 

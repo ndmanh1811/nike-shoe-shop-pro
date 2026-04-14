@@ -65,6 +65,22 @@ public class NotificationController {
     // Đánh dấu thông báo đã đọc
     @PostMapping("/{id}/read")
     public ResponseEntity<Void> markAsRead(@PathVariable Long id) {
+        Optional<AppUser> user = getCurrentUser();
+        if (user.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        // Kiểm tra quyền sở hữu thông báo
+        Optional<Notification> notification = notificationService.findById(id);
+        if (notification.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        Notification n = notification.get();
+        // Cho phép nếu là thông báo của user hoặc là thông báo admin
+        boolean isOwner = (n.getUser() != null && n.getUser().getId().equals(user.get().getId()));
+        boolean isAdmin = n.isAdmin();
+        if (!isOwner && !isAdmin) {
+            return ResponseEntity.status(403).build();
+        }
         notificationService.markAsRead(id);
         return ResponseEntity.ok().build();
     }

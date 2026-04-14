@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class NotificationService {
@@ -73,6 +74,11 @@ public class NotificationService {
     // Đếm số thông báo chưa đọc của admin
     public long countUnreadForAdmin() {
         return notificationRepository.countByIsAdminTrueAndIsReadFalse();
+    }
+
+    // Tìm thông báo theo ID
+    public Optional<Notification> findById(Long id) {
+        return notificationRepository.findById(id);
     }
 
     // Đánh dấu đã đọc

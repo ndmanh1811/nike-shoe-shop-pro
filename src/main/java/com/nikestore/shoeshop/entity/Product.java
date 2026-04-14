@@ -35,7 +35,7 @@ public class Product extends BaseEntity {
     @Column(nullable = false)
     private Double salePrice = 0d;
 
-    @Column(length = 255)
+    @Column(length = 7000)
     private String imageUrl;
 
     @Min(0)

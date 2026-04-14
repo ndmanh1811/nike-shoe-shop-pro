@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order placed</title>
+    <title th:text="'ShoeHouse | Invoice ' + ${order.orderCode}">Order placed</title>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
     <link th:href="@{/webjars/bootstrap-icons/font/bootstrap-icons.css}" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/site.css}">
@@ -40,11 +40,180 @@
             Coupon applied: <strong th:text="${order.couponCode}"></strong>
         </p>
         <div class="d-flex flex-wrap gap-3 justify-content-center">
-            <a th:href="@{/orders}" class="btn btn-outline-dark rounded-pill px-4">View orders</a>
+            <button type="button" class="btn btn-outline-primary rounded-pill px-4" onclick="openInvoiceModal()" style="cursor: pointer; z-index: 1000; position: relative;">
+                <i class="bi bi-receipt me-1"></i> View Invoice
+            </button>
             <a th:href="@{/shop}" class="btn btn-accent rounded-pill px-4">Continue shopping</a>
         </div>
     </div>
 </section>
+
+    <!-- Invoice Modal -->
+    <div class="modal fade" id="invoiceModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold">Invoice</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4" id="invoiceContent">
+                    <!-- Invoice Content -->
+                    <div class="invoice-container">
+                        <div class="text-center mb-4">
+                            <h3 class="fw-black mb-1">SHOEHOUSE</h3>
+                            <p class="text-muted mb-0">Premium Sneaker Store</p>
+                            <p class="text-muted small">Km10, Đường Nguyễn Trãi, Quận Hà Đông, Hà Nội</p>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mb-4">
+                            <div>
+                                <h6 class="fw-bold mb-2">BILL TO:</h6>
+                                <p class="mb-1" th:text="${order.customerName}">Customer Name</p>
+                                <p class="mb-1 text-muted" th:text="${order.email}">email@example.com</p>
+                                <p class="mb-1 text-muted" th:text="${order.phone}">Phone</p>
+                                <p class="text-muted" th:text="${order.address}">Address</p>
+                            </div>
+                            <div class="text-end">
+                                <h5 class="fw-bold mb-2" th:text="'INVOICE #' + ${order.orderCode}">INVOICE #CODE</h5>
+                                <p class="mb-1"><strong>Date:</strong> <span th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy')}">Date</span></p>
+                                <p class="mb-1"><strong>Status:</strong> <span th:text="${order.status}">PENDING</span></p>
+                                <p><strong>Payment:</strong> <span th:text="${order.paymentMethod}">COD</span></p>
+                            </div>
+                        </div>
+                        
+                        <table class="table table-bordered mb-4">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Product</th>
+                                    <th class="text-center">Size</th>
+                                    <th class="text-center">Qty</th>
+                                    <th class="text-end">Unit Price</th>
+                                    <th class="text-end">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="item : ${order.items}">
+                                    <td th:text="${item.productName != null ? item.productName : 'Product'}">Product</td>
+                                    <td class="text-center" th:text="${item.size != null ? item.size : '-'}">-</td>
+                                    <td class="text-center" th:text="${item.quantity != null ? item.quantity : 0}">0</td>
+                                    <td class="text-end" th:text="${item.unitPrice != null ? #numbers.formatDecimal(item.unitPrice,0,'COMMA',0,'POINT') : '0'} + ' đ'">0 đ</td>
+                                    <td class="text-end" th:text="${item.subtotal != null ? #numbers.formatDecimal(item.subtotal,0,'COMMA',0,'POINT') : '0'} + ' đ'">0 đ</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <div class="row justify-content-end">
+                            <div class="col-md-5">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Subtotal:</span>
+                                    <span th:text="${#numbers.formatDecimal(order.subtotalAmount != null ? order.subtotalAmount : 0,0,'COMMA',0,'POINT')} + ' đ'">0 đ</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2 text-success" th:if="${order.discountAmount != null && order.discountAmount > 0}">
+                                    <span>Discount:</span>
+                                    <span>-<span th:text="${#numbers.formatDecimal(order.discountAmount,0,'COMMA',0,'POINT')} + ' đ'"></span></span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2" th:if="${order.couponCode != null}">
+                                    <span>Coupon:</span>
+                                    <span class="badge bg-info" th:text="${order.couponCode}">CODE</span>
+                                </div>
+                                <hr>
+                                <div class="d-flex justify-content-between fw-bold fs-5">
+                                    <span>TOTAL:</span>
+                                    <span th:text="${#numbers.formatDecimal(order.totalAmount != null ? order.totalAmount : 0,0,'COMMA',0,'POINT')} + ' đ'">0 đ</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center mt-5 pt-4 border-top">
+                            <p class="text-muted mb-1">Thank you for shopping with us!</p>
+                            <p class="text-muted small">For any questions, please contact supportshoehouse@gmail.com</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-dark rounded-pill" onclick="printInvoice()">
+                        <i class="bi bi-printer me-1"></i> Print Invoice
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Đảm bảo button có thể click được */
+        .btn {
+            cursor: pointer !important;
+            pointer-events: auto !important;
+        }
+        
+        /* Đảm bảo modal hiển thị đúng */
+        .modal {
+            pointer-events: none;
+        }
+        .modal.show {
+            pointer-events: auto;
+        }
+        .modal-dialog {
+            pointer-events: auto;
+        }
+        
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #invoiceModal, #invoiceModal * {
+                visibility: visible;
+            }
+            #invoiceModal {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .modal-header, .modal-footer, .btn-close {
+                display: none !important;
+            }
+            .modal-content {
+                border: none !important;
+                box-shadow: none !important;
+            }
+        }
+    </style>
+
+    <script>
+        // Kiểm tra và mở modal
+        function openInvoiceModal() {
+            console.log('Opening invoice modal...');
+            var modalElement = document.getElementById('invoiceModal');
+            if (!modalElement) {
+                console.error('Modal element not found!');
+                return;
+            }
+            
+            // Kiểm tra Bootstrap có sẵn không
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                var modal = new bootstrap.Modal(modalElement);
+                modal.show();
+                console.log('Modal opened via Bootstrap');
+            } else {
+                console.error('Bootstrap Modal not available!');
+                // Fallback: hiển thị modal bằng CSS
+                modalElement.style.display = 'block';
+                modalElement.classList.add('show');
+            }
+        }
+        
+        function printInvoice() {
+            window.print();
+        }
+        
+        // Kiểm tra khi trang load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Bootstrap available:', typeof bootstrap !== 'undefined');
+            console.log('Modal element:', document.getElementById('invoiceModal'));
+        });
+    </script>
 
 <div th:replace="~{fragments/site :: footer}"></div>
 <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>

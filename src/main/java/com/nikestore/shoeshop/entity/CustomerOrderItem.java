@@ -13,7 +13,7 @@ public class CustomerOrderItem {
     @Column(nullable = false, length = 190)
     private String productName;
 
-    @Column(length = 255)
+    @Column(length = 7000)
     private String productImage;
 
     @Column(nullable = false)

@@ -4,6 +4,8 @@ import com.nikestore.shoeshop.entity.Product;
 import com.nikestore.shoeshop.service.CatalogService;
 import com.nikestore.shoeshop.service.WishlistService;
 import jakarta.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +16,8 @@ import java.util.List;
 
 @Controller
 public class HomeController {
+
+    private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 
     private final CatalogService catalogService;
     private final WishlistService wishlistService;
@@ -73,14 +77,14 @@ public class HomeController {
     public String detail(@PathVariable String slug, HttpSession session, Model model) {
         try {
             Product product = catalogService.requireProductBySlug(slug);
-            System.out.println("DEBUG: Product loaded - " + product.getName());
+            logger.debug("Product loaded: {}", product.getName());
             model.addAttribute("product", product);
             model.addAttribute("availableSizes", catalogService.availableSizes(product));
             model.addAttribute("relatedProducts", catalogService.relatedProducts(product));
             model.addAttribute("inWishlist", wishlistService.contains(session, product.getId()));
             return "shop/product-detail";
         } catch (IllegalArgumentException e) {
-            System.out.println("DEBUG: Product not found for slug: " + slug);
+            logger.warn("Product not found for slug: {}", slug);
             model.addAttribute("error", "Product not found");
             return "shop/product-detail";
         }

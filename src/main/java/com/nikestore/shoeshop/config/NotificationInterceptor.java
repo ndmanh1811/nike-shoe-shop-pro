@@ -13,11 +13,16 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 import java.util.Optional;
 
 @Component
 public class NotificationInterceptor implements HandlerInterceptor {
+
+    private static final Logger logger = LoggerFactory.getLogger(NotificationInterceptor.class);
 
     @Autowired
     private NotificationService notificationService;
@@ -85,7 +90,7 @@ public class NotificationInterceptor implements HandlerInterceptor {
             }
         } catch (Exception e) {
             // Log error but don't break the page
-            System.err.println("NotificationInterceptor error: " + e.getMessage());
+            logger.error("NotificationInterceptor error: {}", e.getMessage(), e);
         }
     }
 }
