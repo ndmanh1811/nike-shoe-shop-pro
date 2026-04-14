@@ -63,16 +63,16 @@ public class CartController {
     }
 
     @PostMapping("/cart/update")
-    public String updateCart(@RequestParam Long productId, @RequestParam int quantity, @RequestParam String size, HttpSession session, RedirectAttributes redirectAttributes) {
+    public String updateCart(@RequestParam Long productId, @RequestParam int quantity, @RequestParam String size, @RequestParam String oldSize, HttpSession session, RedirectAttributes redirectAttributes) {
         var product = catalogService.requireProductById(productId);
-        cartService.update(session, productId, quantity, size, product);
+        cartService.update(session, productId, quantity, oldSize, size, product);
         redirectAttributes.addFlashAttribute("success", "Cart updated successfully!");
         return "redirect:/cart";
     }
 
     @PostMapping("/cart/remove")
-    public String removeCart(@RequestParam Long productId, HttpSession session, RedirectAttributes redirectAttributes) {
-        cartService.remove(session, productId);
+    public String removeCart(@RequestParam Long productId, @RequestParam String size, HttpSession session, RedirectAttributes redirectAttributes) {
+        cartService.remove(session, productId, size);
         redirectAttributes.addFlashAttribute("info", "Item removed from cart.");
         return "redirect:/cart";
     }

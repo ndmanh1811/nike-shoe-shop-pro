@@ -14,19 +14,24 @@ public class CartService {
     private static final String CART_KEY = "CART";
 
     @SuppressWarnings("unchecked")
-    private Map<Long, CartItemView> cart(HttpSession session) {
+    private Map<String, CartItemView> cart(HttpSession session) {
         Object obj = session.getAttribute(CART_KEY);
         if (obj instanceof Map<?, ?> map) {
-            return (Map<Long, CartItemView>) map;
+            return (Map<String, CartItemView>) map;
         }
-        Map<Long, CartItemView> newCart = new LinkedHashMap<>();
+        Map<String, CartItemView> newCart = new LinkedHashMap<>();
         session.setAttribute(CART_KEY, newCart);
         return newCart;
     }
 
+    private String cartKey(Long productId, String size) {
+        return productId + "_" + size;
+    }
+
     public void add(HttpSession session, Product product, int quantity, String size) {
-        Map<Long, CartItemView> cart = cart(session);
-        CartItemView item = cart.get(product.getId());
+        Map<String, CartItemView> cart = cart(session);
+        String key = cartKey(product.getId(), size);
+        CartItemView item = cart.get(key);
         int requestedQty = Math.max(quantity, 1);
         int stock = product.getStock() != null ? product.getStock() : 0;
 
@@ -42,37 +47,67 @@ public class CartService {
                     finalQty,
                     size
             );
-            cart.put(product.getId(), item);
+            cart.put(key, item);
         } else {
-            // Existing item: add quantity but cap at stock limit
+            // Existing item with same size: add quantity but cap at stock limit
             int newQty = item.getQuantity() + requestedQty;
             int finalQty = Math.min(newQty, stock);
             item.setQuantity(finalQty);
-            item.setSize(size);
         }
     }
 
-    public void update(HttpSession session, Long productId, int quantity, String size, Product product) {
-        Map<Long, CartItemView> cart = cart(session);
-        CartItemView item = cart.get(productId);
+    public void update(HttpSession session, Long productId, int quantity, String oldSize, String newSize, Product product) {
+        Map<String, CartItemView> cart = cart(session);
+        String oldKey = cartKey(productId, oldSize);
+        String newKey = cartKey(productId, newSize);
+        CartItemView item = cart.get(oldKey);
         if (item != null && product != null) {
             int requestedQty = Math.max(quantity, 1);
             int stock = product.getStock() != null ? product.getStock() : 0;
             int finalQty = Math.min(requestedQty, stock);
-            item.setQuantity(finalQty);
-            item.setSize(size);
+
+            if (oldSize.equals(newSize)) {
+                // Same size, just update quantity
+                item.setQuantity(finalQty);
+            } else {
+                // Size changed: remove from old, add to new (or merge if new exists)
+                CartItemView existingNew = cart.get(newKey);
+                if (existingNew != null) {
+                    // New size already exists: merge quantities
+                    existingNew.setQuantity(Math.min(existingNew.getQuantity() + finalQty, stock));
+                } else {
+                    // Create new entry with new size
+                    CartItemView newItem = new CartItemView(
+                            product.getId(),
+                            product.getName(),
+                            product.getSlug(),
+                            product.getImageUrl(),
+                            product.effectivePrice(),
+                            finalQty,
+                            newSize
+                    );
+                    cart.put(newKey, newItem);
+                }
+                // Remove old entry
+                cart.remove(oldKey);
+            }
         }
     }
 
+    public void remove(HttpSession session, Long productId, String size) {
+        cart(session).remove(cartKey(productId, size));
+    }
+
     public void remove(HttpSession session, Long productId) {
-        cart(session).remove(productId);
+        // Remove all sizes of this product
+        cart(session).entrySet().removeIf(entry -> entry.getValue().getProductId().equals(productId));
     }
 
     public void clear(HttpSession session) {
         cart(session).clear();
     }
 
-    public Map<Long, CartItemView> items(HttpSession session) {
+    public Map<String, CartItemView> items(HttpSession session) {
         return cart(session);
     }
 

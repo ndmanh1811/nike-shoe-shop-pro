@@ -52,6 +52,7 @@
                             <td>
                                 <form th:action="@{/cart/update}" method="post" class="d-grid gap-2">
                                     <input type="hidden" name="productId" th:value="${item.productId}">
+                                    <input type="hidden" name="oldSize" th:value="${item.size}">
                                     <div class="d-flex gap-2 align-items-center">
                                         <select name="size" class="form-select form-select-sm">
                                             <option th:selected="${item.size == '39'}">39</option>
@@ -72,6 +73,7 @@
                             <td class="text-end">
                                 <form th:action="@{/cart/remove}" method="post" class="d-inline">
                                     <input type="hidden" name="productId" th:value="${item.productId}">
+                                    <input type="hidden" name="size" th:value="${item.size}">
                                     <button class="btn btn-sm btn-outline-danger rounded-pill"><i class="bi bi-trash"></i></button>
                                 </form>
                             </td>

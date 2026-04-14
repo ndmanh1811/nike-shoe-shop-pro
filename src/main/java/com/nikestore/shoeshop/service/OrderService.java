@@ -30,7 +30,7 @@ public class OrderService {
     }
 
     @Transactional
-    public CustomerOrder createOrder(CheckoutForm form, Map<Long, CartItemView> cart, String email, CouponService.CouponQuote couponQuote) {
+    public CustomerOrder createOrder(CheckoutForm form, Map<String, CartItemView> cart, String email, CouponService.CouponQuote couponQuote) {
         CustomerOrder order = new CustomerOrder();
         order.setOrderCode("NK-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
         order.setCustomerName(form.getCustomerName());
