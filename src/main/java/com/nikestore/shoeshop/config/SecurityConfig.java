@@ -15,7 +15,6 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -59,15 +58,19 @@ public class SecurityConfig {
         );
 
         http.formLogin(form -> form
-                .loginPage("/signin")              // trang login
-                .loginProcessingUrl("/login")      // xử lý login
+                .loginPage("/signin")
+                .loginProcessingUrl("/login")
                 .defaultSuccessUrl("/", true)
                 .failureUrl("/signin?error=true")
                 .permitAll()
         );
 
         http.logout(logout -> logout
+                .logoutUrl("/logout")
                 .logoutSuccessUrl("/?logout=true")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
+                .clearAuthentication(true)
                 .permitAll()
         );
 
@@ -75,9 +78,9 @@ public class SecurityConfig {
                 session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
         );
 
-        // CSRF enabled for security
+        // Ignore CSRF for notification APIs (protected by authentication)
+        http.csrf(csrf -> csrf.ignoringRequestMatchers("/api/notifications/**"));
 
         return http.build();
     }
-
 }
