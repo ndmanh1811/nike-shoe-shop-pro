@@ -2,9 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 
-<!-- Toast Notifications Container -->
 <div th:fragment="toast" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1050;">
-    <!-- Success Toast -->
     <div th:if="${success}" class="toast align-items-center text-bg-success border-0 show" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
         <div class="d-flex">
             <div class="toast-body">
@@ -14,7 +12,6 @@
             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
     </div>
-    <!-- Error Toast -->
     <div th:if="${error}" class="toast align-items-center text-bg-danger border-0 show" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
         <div class="d-flex">
             <div class="toast-body">
@@ -24,7 +21,6 @@
             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
     </div>
-    <!-- Warning Toast -->
     <div th:if="${warning}" class="toast align-items-center text-bg-warning border-0 show" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="4000">
         <div class="d-flex">
             <div class="toast-body">
@@ -34,7 +30,6 @@
             <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
     </div>
-    <!-- Info Toast -->
     <div th:if="${info}" class="toast align-items-center text-bg-info border-0 show" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
         <div class="d-flex">
             <div class="toast-body">
@@ -60,7 +55,6 @@
             <div class="collapse navbar-collapse" id="mainNav">
                 <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-lg-2">
                     <li class="nav-item"><a class="nav-link" th:href="@{/}" th:text="#{nav.home}">Home</a></li>
-                    <!-- Categories Dropdown -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" th:text="#{nav.categories}">Categories</a>
                         <ul class="dropdown-menu dropdown-menu-dark">
@@ -71,7 +65,6 @@
                             </li>
                         </ul>
                     </li>
-                    <!-- Brands Dropdown -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" th:text="#{nav.brands}">Brands</a>
                         <ul class="dropdown-menu dropdown-menu-dark">
@@ -84,7 +77,7 @@
                     </li>
                     <li class="nav-item"><a class="nav-link" th:href="@{/wishlist}" th:text="#{nav.wishlist}">Wishlist</a></li>
                     <li class="nav-item"><a class="nav-link" th:href="@{/orders}" th:text="#{nav.orders}">Orders</a></li>
-                    <!-- Language Switcher -->
+                    
                     <li class="nav-item dropdown ms-lg-3">
                         <a class="nav-link dropdown-toggle d-flex align-items-center gap-1" href="#" role="button" data-bs-toggle="dropdown" id="langDropdown">
                             <i class="bi bi-globe"></i>
@@ -103,6 +96,12 @@
                             </li>
                         </ul>
                     </li>
+
+                    <li class="nav-item d-flex align-items-center ms-lg-1 border-start border-secondary ps-lg-2">
+                        <button class="btn btn-link nav-link px-2 d-flex align-items-center" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+                            <i class="theme-icon bi bi-moon-stars-fill fs-5"></i>
+                        </button>
+                    </li>
                 </ul>
 
                 <div class="d-flex align-items-center gap-2" th:if="${loggedIn}">
@@ -115,7 +114,6 @@
                         <span class="badge text-bg-light position-absolute top-0 start-100 translate-middle" th:if="${cartCount > 0}" th:text="${cartCount}" style="font-size: 0.65em; padding: 0.35em 0.65em;">0</span>
                     </a>
                     
-                    <!-- Notification Bell for User -->
                     <div class="dropdown" th:if="${notificationCount != null && currentUserRole != 'ROLE_ADMIN'}">
                         <a class="btn btn-outline-light btn-sm rounded-pill px-3 position-relative d-flex align-items-center justify-content-center" href="#" role="button" data-bs-toggle="dropdown" id="notificationDropdown" style="width: 38px; height: 31px; padding: 0;">
                             <i class="bi bi-bell"></i>
@@ -182,7 +180,6 @@
                         </div>
                     </div>
                     
-                    <!-- Notification Bell for Admin -->
                     <div class="dropdown" th:if="${adminNotificationCount != null && currentUserRole == 'ROLE_ADMIN'}">
                         <a class="btn btn-outline-light btn-sm rounded-pill px-3 position-relative d-flex align-items-center justify-content-center" href="#" role="button" data-bs-toggle="dropdown" id="adminNotificationDropdown" style="width: 38px; height: 31px; padding: 0;">
                             <i class="bi bi-bell"></i>
@@ -310,7 +307,6 @@
     </div>
 </footer>
 
-<!-- Toast Auto-Hide Script -->
 <script th:fragment="toastScript">
     document.addEventListener('DOMContentLoaded', function() {
         var toasts = document.querySelectorAll('.toast');
@@ -324,8 +320,37 @@
     });
 </script>
 
-<!-- Language Switcher Script -->
 <script th:fragment="langScript">
+    // --- THEME / DARK MODE SCRIPT ---
+    function applyTheme(theme) {
+        document.documentElement.setAttribute('data-bs-theme', theme);
+        localStorage.setItem('theme', theme);
+        
+        // Update the icon
+        const icons = document.querySelectorAll('.theme-icon');
+        icons.forEach(icon => {
+            if (theme === 'dark') {
+                icon.className = 'theme-icon bi bi-sun-fill text-warning fs-5';
+            } else {
+                icon.className = 'theme-icon bi bi-moon-stars-fill fs-5 text-light';
+            }
+        });
+    }
+
+    function toggleTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        applyTheme(newTheme);
+    }
+
+    // Set theme immediately to avoid flash of light mode
+    (function() {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-bs-theme', savedTheme);
+    })();
+
+
+    // --- LANGUAGE SWITCHER SCRIPT ---
     function getCookie(name) {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${name}=`);
@@ -343,27 +368,26 @@
             event.preventDefault();
             event.stopPropagation();
         }
-        // Set cookie trước (tên 'locale' để đồng bộ với server)
         setCookie('locale', lang, 365);
-        // Cập nhật hiển thị
         const langSpan = document.getElementById('currentLang');
         if (langSpan) {
             langSpan.textContent = lang.toUpperCase();
         }
-        // Tạo URL mới với param lang
         let url = window.location.href;
-        // Xóa lang param cũ nếu có
         url = url.replace(/[?&]lang=[^&]*/g, '');
-        // Thêm lang param mới
         const separator = url.indexOf('?') > -1 ? '&' : '?';
         url = url + separator + 'lang=' + lang;
-        // Chuyển trang
         window.location.replace(url);
         return false;
     }
 
-    // Update display on page load
+    // --- DOM CONTENT LOADED EVENT ---
     document.addEventListener('DOMContentLoaded', function() {
+        // Init Theme Icon
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        applyTheme(savedTheme);
+
+        // Init Language
         const urlParams = new URLSearchParams(window.location.search);
         const urlLang = urlParams.get('lang');
         const cookieLang = getCookie('locale');
@@ -372,13 +396,12 @@
         if (langSpan) {
             langSpan.textContent = lang.toUpperCase();
         }
-        // Set cookie nếu có param
         if (urlLang) {
             setCookie('locale', urlLang, 365);
         }
     });
 
-    // Notification functions
+    // --- NOTIFICATION SCRIPT ---
     function markAllAsRead() {
         fetch('/api/notifications/mark-all-read', { 
             method: 'POST',

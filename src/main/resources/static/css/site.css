@@ -691,3 +691,43 @@ a{text-decoration:none}
   border-radius:4px;
 }
 ::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+
+
+
+[data-bs-theme="dark"] body {
+    background-color: #121212 !important; 
+}
+
+
+[data-bs-theme="dark"] .order-detail-card,
+[data-bs-theme="dark"] .info-card,
+[data-bs-theme="dark"] .product-card {
+    background: #1e1e1e; /* Màu xám đậm cho thẻ */
+    border-color: #2d2d2d;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+
+/* Đổi màu các dòng kẻ và nền phụ trong Dark Mode */
+[data-bs-theme="dark"] .timeline-item-new {
+    border-bottom-color: #2d2d2d;
+}
+[data-bs-theme="dark"] .timeline-item-new::before {
+    background-color: #2d2d2d;
+}
+[data-bs-theme="dark"] .table-responsive .table th,
+[data-bs-theme="dark"] .total-row,
+[data-bs-theme="dark"] .product-img.bg-light {
+    background-color: #2d2d2d !important;
+    color: #e0e0e0;
+}
+[data-bs-theme="dark"] .table-responsive .table td {
+    border-bottom-color: #2d2d2d;
+}
+
+/* Đổi màu chữ nếu bị tối */
+[data-bs-theme="dark"] .text-dark {
+    color: #f8f9fa !important;
+}
+[data-bs-theme="dark"] .info-value {
+    color: #f8f9fa;
+}
