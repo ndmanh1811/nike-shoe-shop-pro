@@ -3,23 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ShoeHouse | Wishlist</title>
+    <title>ShoeHouse | <span th:text="#{nav.wishlist}">Wishlist</span></title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
     <link th:href="@{/webjars/bootstrap-icons/font/bootstrap-icons.css}" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/site.css}">
 </head>
 <body>
+<div th:replace="~{fragments/site :: toast}"></div>
 <div th:replace="~{fragments/site :: header}"></div>
 
 <section class="container py-5">
     <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-3">
         <div>
-            <div class="eyebrow text-dark">Your favorites</div>
-            <h1 class="fw-bold mb-0">Wishlist</h1>
+            <div class="eyebrow text-dark" th:text="#{wishlist.your.favorites}">Your favorites</div>
+            <h1 class="fw-bold mb-0" th:text="#{nav.wishlist}">Wishlist</h1>
         </div>
         <form th:action="@{/wishlist/clear}" method="post" th:if="${not #lists.isEmpty(products)}">
-            <button class="btn btn-outline-dark rounded-pill">Clear wishlist</button>
+            <button class="btn btn-outline-dark rounded-pill" th:text="#{wishlist.clear}">Clear wishlist</button>
         </form>
     </div>
 
@@ -30,13 +31,13 @@
                     <img th:src="${p.imageUrl}" th:alt="${p.name}">
                 </div>
                 <div class="product-body">
-                    <small class="text-uppercase text-white-50" th:text="${p.brand.name}"></small>
+                    <small class="text-uppercase text-white-50" th:if="${p.brand != null}" th:text="${p.brand.name}"></small>
                     <h5 class="mt-1 mb-1 fw-bold clamp-2" th:text="${p.name}"></h5>
                     <div class="price-row mt-3">
                         <span class="price" th:text="${#numbers.formatDecimal(p.effectivePrice(),0,'COMMA',0,'POINT')} + ' đ'"></span>
                     </div>
                     <div class="d-flex gap-2 mt-3">
-                        <a th:href="@{'/product/' + ${p.slug}}" class="btn btn-light btn-sm rounded-pill flex-grow-1">Details</a>
+                        <a th:href="@{'/product/' + ${p.slug}}" class="btn btn-light btn-sm rounded-pill flex-grow-1" th:text="#{product.details}">Details</a>
                         <form th:action="@{/wishlist/{id}/remove(id=${p.id})}" method="post">
                             <button class="btn btn-dark btn-sm rounded-pill"><i class="bi bi-heart-fill"></i></button>
                         </form>
@@ -48,13 +49,16 @@
 
     <div class="empty-state" th:if="${#lists.isEmpty(products)}">
         <i class="bi bi-heart"></i>
-        <h4 class="fw-bold mt-3">Wishlist is empty</h4>
-        <p class="text-muted mb-0">Save your favorite shoes here while browsing the shop.</p>
-        <a th:href="@{/shop}" class="btn btn-accent rounded-pill mt-4 px-4">Browse shoes</a>
+        <h4 class="fw-bold mt-3" th:text="#{wishlist.empty}">Wishlist is empty</h4>
+        <p class="text-muted mb-0" th:text="#{wishlist.save.favorites}">Save your favorite shoes here while browsing the shop.</p>
+        <a th:href="@{/shop}" class="btn btn-accent rounded-pill mt-4 px-4" th:text="#{wishlist.browse.shoes}">Browse shoes</a>
     </div>
 </section>
 
 <div th:replace="~{fragments/site :: footer}"></div>
 <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:replace="~{fragments/site :: toastScript}"></script>
+<script th:replace="~{fragments/site :: langScript}"></script>
+<script th:src="@{/js/animations.js}"></script>
 </body>
 </html>

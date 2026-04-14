@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>400 - Bad Request | ShoeHouse</title>
+    <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/site.css}">
+    <style>
+        .error-page {
+            min-height: 60vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .error-code {
+            font-size: 8rem;
+            font-weight: 900;
+            color: #ffc107;
+            line-height: 1;
+        }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/site :: header}"></div>
+
+<section class="error-page">
+    <div class="container">
+        <div class="error-code">400</div>
+        <h1 class="fw-bold mt-3" th:text="${errorTitle ?: 'Bad Request'}">Bad Request</h1>
+        <p class="text-muted mt-2" th:text="${errorMessage ?: 'The request could not be understood by the server.'}">
+            The request could not be understood by the server.
+        </p>
+        <div class="mt-4">
+            <a th:href="@{/}" class="btn btn-accent rounded-pill px-4">Go Home</a>
+        </div>
+    </div>
+</section>
+
+<div th:replace="~{fragments/site :: footer}"></div>
+<script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

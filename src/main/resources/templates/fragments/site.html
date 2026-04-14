@@ -1,6 +1,51 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
+
+<!-- Toast Notifications Container -->
+<div th:fragment="toast" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+    <!-- Success Toast -->
+    <div th:if="${success}" class="toast align-items-center text-bg-success border-0 show" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="bi bi-check-circle me-2"></i>
+                <span th:text="${success}">Operation successful!</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+    <!-- Error Toast -->
+    <div th:if="${error}" class="toast align-items-center text-bg-danger border-0 show" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="bi bi-exclamation-circle me-2"></i>
+                <span th:text="${error}">An error occurred!</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+    <!-- Warning Toast -->
+    <div th:if="${warning}" class="toast align-items-center text-bg-warning border-0 show" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="4000">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <span th:text="${warning}">Warning!</span>
+            </div>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+    <!-- Info Toast -->
+    <div th:if="${info}" class="toast align-items-center text-bg-info border-0 show" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="bi bi-info-circle me-2"></i>
+                <span th:text="${info}">Information</span>
+            </div>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
 <header th:fragment="header">
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top border-bottom border-secondary"
          style="background: rgba(10,10,10,.92); backdrop-filter: blur(14px);">
@@ -14,36 +59,215 @@
             </button>
             <div class="collapse navbar-collapse" id="mainNav">
                 <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-lg-2">
-                    <li class="nav-item"><a class="nav-link" th:href="@{/}">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" th:href="@{/shop}">Shop</a></li>
-                    <li class="nav-item"><a class="nav-link" th:href="@{/wishlist}">Wishlist</a></li>
-                    <li class="nav-item"><a class="nav-link" th:href="@{/orders}">Orders</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/}" th:text="#{nav.home}">Home</a></li>
+                    <!-- Categories Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" th:text="#{nav.categories}">Categories</a>
+                        <ul class="dropdown-menu dropdown-menu-dark">
+                            <li><a class="dropdown-item" th:href="@{/shop}">All Products</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li th:each="cat : ${navCategories}">
+                                <a class="dropdown-item" th:href="@{/shop(categoryId=${cat.id})}" th:text="${cat.name}"></a>
+                            </li>
+                        </ul>
+                    </li>
+                    <!-- Brands Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" th:text="#{nav.brands}">Brands</a>
+                        <ul class="dropdown-menu dropdown-menu-dark">
+                            <li><a class="dropdown-item" th:href="@{/shop}">All Products</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li th:each="br : ${navBrands}">
+                                <a class="dropdown-item" th:href="@{/shop(brandId=${br.id})}" th:text="${br.name}"></a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/wishlist}" th:text="#{nav.wishlist}">Wishlist</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/orders}" th:text="#{nav.orders}">Orders</a></li>
+                    <!-- Language Switcher -->
+                    <li class="nav-item dropdown ms-lg-3">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-1" href="#" role="button" data-bs-toggle="dropdown" id="langDropdown">
+                            <i class="bi bi-globe"></i>
+                            <span id="currentLang">EN</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="#" onclick="return setLang('en', event)">
+                                    <span>🇺🇸</span> English
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="#" onclick="return setLang('vi', event)">
+                                    <span>🇻🇳</span> Tiếng Việt
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
                 </ul>
 
-                <div class="d-flex align-items-center gap-2 gap-lg-3" th:if="${loggedIn}">
-                    <a class="btn btn-outline-light btn-sm rounded-pill px-3 d-flex align-items-center gap-2" th:href="@{/wishlist}">
+                <div class="d-flex align-items-center gap-2" th:if="${loggedIn}">
+                    <a class="btn btn-outline-light btn-sm rounded-pill position-relative d-flex align-items-center justify-content-center" th:href="@{/wishlist}" style="width: 38px; height: 31px; padding: 0;">
                         <i class="bi bi-heart"></i>
-                        <span>Wish</span>
-                        <span class="badge text-bg-light ms-1" th:text="${wishlistCount}">0</span>
+                        <span class="badge text-bg-light position-absolute top-0 start-100 translate-middle" th:if="${wishlistCount > 0}" th:text="${wishlistCount}" style="font-size: 0.65em; padding: 0.35em 0.65em;">0</span>
                     </a>
-                    <a class="btn btn-outline-light btn-sm rounded-pill px-3 d-flex align-items-center gap-2" th:href="@{/cart}">
+                    <a class="btn btn-outline-light btn-sm rounded-pill position-relative d-flex align-items-center justify-content-center" th:href="@{/cart}" style="width: 38px; height: 31px; padding: 0;">
                         <i class="bi bi-bag"></i>
-                        <span>Cart</span>
-                        <span class="badge text-bg-light ms-1" th:text="${cartCount}">0</span>
+                        <span class="badge text-bg-light position-absolute top-0 start-100 translate-middle" th:if="${cartCount > 0}" th:text="${cartCount}" style="font-size: 0.65em; padding: 0.35em 0.65em;">0</span>
                     </a>
-                    <a class="btn btn-outline-secondary btn-sm rounded-pill px-3" th:if="${currentUserRole == 'ROLE_ADMIN'}" th:href="@{/admin}">
-                        Admin
-                    </a>
+                    
+                    <!-- Notification Bell for User -->
+                    <div class="dropdown" th:if="${notificationCount != null && currentUserRole != 'ROLE_ADMIN'}">
+                        <a class="btn btn-outline-light btn-sm rounded-pill px-3 position-relative d-flex align-items-center justify-content-center" href="#" role="button" data-bs-toggle="dropdown" id="notificationDropdown" style="width: 38px; height: 31px; padding: 0;">
+                            <i class="bi bi-bell"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
+                                  th:if="${notificationCount > 0}" th:text="${notificationCount}" style="font-size: 0.65em; padding: 0.35em 0.65em;">0</span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end p-0 border-0 shadow-lg" style="min-width: 320px; max-width: 360px; border-radius: 16px; overflow: hidden;">
+                            <div class="bg-dark text-white px-3 py-3 d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0 fw-bold" th:text="#{notification.title}">Thông báo</h6>
+                                <span class="badge bg-danger rounded-pill" th:if="${notificationCount > 0}" th:text="${notificationCount}">0</span>
+                            </div>
+                            <div class="bg-white" style="max-height: 350px; overflow-y: auto;">
+                                <div th:if="${#lists.isEmpty(notifications)}" class="text-center py-4 text-muted">
+                                    <i class="bi bi-bell-slash fs-1 d-block mb-2 opacity-50"></i>
+                                    <span th:text="#{notification.empty}">Không có thông báo mới</span>
+                                </div>
+                                <th:block th:each="noti : ${notifications}">
+                                <a th:href="@{/orders/{id}(id=${noti.relatedId})}" 
+                                   th:if="${noti.relatedId != null}"
+                                   class="d-flex align-items-start gap-3 px-3 py-3 border-bottom text-decoration-none"
+                                   style="transition: background-color 0.2s;"
+                                   onmouseover="this.style.backgroundColor='#f8f9fa'" 
+                                   onmouseout="this.style.backgroundColor='transparent'">
+                                    <div class="flex-shrink-0">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);">
+                                            <i class="bi bi-bag-check text-white"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 min-width-0">
+                                        <div class="fw-semibold small text-dark mb-1" th:text="${noti.title}">Title</div>
+                                        <div class="text-muted small text-truncate" th:text="${noti.message}">Message</div>
+                                        <div class="text-muted smaller mt-1" style="font-size: 0.75rem;" th:text="${noti.createdAt != null} ? ${#temporals.format(noti.createdAt, 'dd/MM HH:mm')} : ''">12/04 14:30</div>
+                                    </div>
+                                    <div class="flex-shrink-0">
+                                        <span class="rounded-circle bg-danger d-block" style="width: 8px; height: 8px;"></span>
+                                    </div>
+                                </a>
+                                <a href="#" 
+                                   th:if="${noti.relatedId == null}"
+                                   class="d-flex align-items-start gap-3 px-3 py-3 border-bottom text-decoration-none"
+                                   style="transition: background-color 0.2s;"
+                                   onmouseover="this.style.backgroundColor='#f8f9fa'" 
+                                   onmouseout="this.style.backgroundColor='transparent'">
+                                    <div class="flex-shrink-0">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);">
+                                            <i class="bi bi-bag-check text-white"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 min-width-0">
+                                        <div class="fw-semibold small text-dark mb-1" th:text="${noti.title}">Title</div>
+                                        <div class="text-muted small text-truncate" th:text="${noti.message}">Message</div>
+                                        <div class="text-muted smaller mt-1" style="font-size: 0.75rem;" th:text="${noti.createdAt != null} ? ${#temporals.format(noti.createdAt, 'dd/MM HH:mm')} : ''">12/04 14:30</div>
+                                    </div>
+                                    <div class="flex-shrink-0">
+                                        <span class="rounded-circle bg-danger d-block" style="width: 8px; height: 8px;"></span>
+                                    </div>
+                                </a>
+                                </th:block>
+                            </div>
+                            <div class="bg-light px-3 py-2 border-top">
+                                <a class="text-decoration-none small fw-semibold d-block text-center py-1" href="#" onclick="markAllAsRead(); return false;" 
+                                   style="color: #ff6b35;" th:text="#{notification.markAllRead}">Đánh dấu tất cả đã đọc</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Notification Bell for Admin -->
+                    <div class="dropdown" th:if="${adminNotificationCount != null && currentUserRole == 'ROLE_ADMIN'}">
+                        <a class="btn btn-outline-light btn-sm rounded-pill px-3 position-relative d-flex align-items-center justify-content-center" href="#" role="button" data-bs-toggle="dropdown" id="adminNotificationDropdown" style="width: 38px; height: 31px; padding: 0;">
+                            <i class="bi bi-bell"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
+                                  th:if="${adminNotificationCount > 0}" th:text="${adminNotificationCount}" style="font-size: 0.65em; padding: 0.35em 0.65em;">0</span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end p-0 border-0 shadow-lg" style="min-width: 320px; max-width: 360px; border-radius: 16px; overflow: hidden;">
+                            <div class="bg-dark text-white px-3 py-3 d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0 fw-bold" th:text="#{notification.title}">Thông báo</h6>
+                                <span class="badge bg-danger rounded-pill" th:if="${adminNotificationCount > 0}" th:text="${adminNotificationCount}">0</span>
+                            </div>
+                            <div class="bg-white" style="max-height: 350px; overflow-y: auto;">
+                                <div th:if="${#lists.isEmpty(adminNotifications)}" class="text-center py-4 text-muted">
+                                    <i class="bi bi-bell-slash fs-1 d-block mb-2 opacity-50"></i>
+                                    <span th:text="#{notification.empty}">Không có thông báo mới</span>
+                                </div>
+                                <th:block th:each="noti : ${adminNotifications}">
+                                <a th:href="@{/admin/orders/{id}(id=${noti.relatedId})}" 
+                                   th:if="${noti.relatedId != null}"
+                                   class="d-flex align-items-start gap-3 px-3 py-3 border-bottom text-decoration-none"
+                                   style="transition: background-color 0.2s;"
+                                   onmouseover="this.style.backgroundColor='#f8f9fa'" 
+                                   onmouseout="this.style.backgroundColor='transparent'">
+                                    <div class="flex-shrink-0">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                            <i class="bi bi-cart-plus text-white"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 min-width-0">
+                                        <div class="fw-semibold small text-dark mb-1" th:text="${noti.title}">Title</div>
+                                        <div class="text-muted small text-truncate" th:text="${noti.message}">Message</div>
+                                        <div class="text-muted smaller mt-1" style="font-size: 0.75rem;" th:text="${noti.createdAt != null} ? ${#temporals.format(noti.createdAt, 'dd/MM HH:mm')} : ''">12/04 14:30</div>
+                                    </div>
+                                    <div class="flex-shrink-0">
+                                        <span class="rounded-circle bg-danger d-block" style="width: 8px; height: 8px;"></span>
+                                    </div>
+                                </a>
+                                <a href="#" 
+                                   th:if="${noti.relatedId == null}"
+                                   class="d-flex align-items-start gap-3 px-3 py-3 border-bottom text-decoration-none"
+                                   style="transition: background-color 0.2s;"
+                                   onmouseover="this.style.backgroundColor='#f8f9fa'" 
+                                   onmouseout="this.style.backgroundColor='transparent'">
+                                    <div class="flex-shrink-0">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                            <i class="bi bi-cart-plus text-white"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 min-width-0">
+                                        <div class="fw-semibold small text-dark mb-1" th:text="${noti.title}">Title</div>
+                                        <div class="text-muted small text-truncate" th:text="${noti.message}">Message</div>
+                                        <div class="text-muted smaller mt-1" style="font-size: 0.75rem;" th:text="${noti.createdAt != null} ? ${#temporals.format(noti.createdAt, 'dd/MM HH:mm')} : ''">12/04 14:30</div>
+                                    </div>
+                                    <div class="flex-shrink-0">
+                                        <span class="rounded-circle bg-danger d-block" style="width: 8px; height: 8px;"></span>
+                                    </div>
+                                </a>
+                                </th:block>
+                            </div>
+                            <div class="bg-light px-3 py-2 border-top">
+                                <a class="text-decoration-none small fw-semibold d-block text-center py-1" href="#" onclick="markAllAdminAsRead(); return false;" 
+                                   style="color: #ff6b35;" th:text="#{notification.markAllRead}">Đánh dấu tất cả đã đọc</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <a class="btn btn-outline-light btn-sm rounded-pill px-3" th:if="${currentUserRole == 'ROLE_ADMIN'}" th:href="@{/admin}">Admin</a>
                     <div class="d-none d-lg-flex flex-column text-end me-2">
                         <small class="text-white-50">Welcome</small>
                         <strong class="text-white" th:text="${currentUserName}"></strong>
                     </div>
-                    <a class="btn btn-light btn-sm rounded-pill px-3" th:href="@{/logout}">Logout</a>
+                    <a class="btn btn-outline-light btn-sm rounded-pill px-3" th:href="@{/logout}" th:text="#{nav.logout}">Logout</a>
                 </div>
 
                 <div class="d-flex align-items-center gap-2" th:unless="${loggedIn}">
-                    <a class="btn btn-outline-light btn-sm rounded-pill px-3" th:href="@{/login}">Login</a>
-                    <a class="btn btn-light btn-sm rounded-pill px-3" th:href="@{/register}">Register</a>
+                    <a class="btn btn-outline-light btn-sm rounded-pill position-relative d-flex align-items-center justify-content-center" th:href="@{/wishlist}" style="width: 38px; height: 31px; padding: 0;">
+                        <i class="bi bi-heart"></i>
+                        <span class="badge text-bg-light position-absolute top-0 start-100 translate-middle" th:if="${wishlistCount > 0}" th:text="${wishlistCount}" style="font-size: 0.65em; padding: 0.35em 0.65em;">0</span>
+                    </a>
+                    <a class="btn btn-outline-light btn-sm rounded-pill position-relative d-flex align-items-center justify-content-center" th:href="@{/cart}" style="width: 38px; height: 31px; padding: 0;">
+                        <i class="bi bi-bag"></i>
+                        <span class="badge text-bg-light position-absolute top-0 start-100 translate-middle" th:if="${cartCount > 0}" th:text="${cartCount}" style="font-size: 0.65em; padding: 0.35em 0.65em;">0</span>
+                    </a>
+                    <a class="btn btn-outline-light btn-sm rounded-pill px-3" th:href="@{/signin}" th:text="#{nav.login}">Login</a>
+                    <a class="btn btn-light btn-sm rounded-pill px-3" th:href="@{/register}" th:text="#{nav.register}">Register</a>
                 </div>
             </div>
         </div>
@@ -67,7 +291,7 @@
                         <li><a th:href="@{/shop}">Shop</a></li>
                         <li><a th:href="@{/wishlist}">Wishlist</a></li>
                         <li><a th:href="@{/cart}">Cart</a></li>
-                        <li><a th:href="@{/login}">Login</a></li>
+                        <li><a th:href="@{/signin}">Login</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-4">
@@ -85,5 +309,111 @@
         </div>
     </div>
 </footer>
+
+<!-- Toast Auto-Hide Script -->
+<script th:fragment="toastScript">
+    document.addEventListener('DOMContentLoaded', function() {
+        var toasts = document.querySelectorAll('.toast');
+        toasts.forEach(function(toast) {
+            var delay = toast.getAttribute('data-bs-delay') || 3000;
+            setTimeout(function() {
+                var bsToast = bootstrap.Toast.getOrCreateInstance(toast);
+                bsToast.hide();
+            }, parseInt(delay));
+        });
+    });
+</script>
+
+<!-- Language Switcher Script -->
+<script th:fragment="langScript">
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+    }
+
+    function setCookie(name, value, days) {
+        const expires = new Date(Date.now() + days * 864e5).toUTCString();
+        document.cookie = `${name}=${value}; expires=${expires}; path=/`;
+    }
+
+    function setLang(lang, event) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        // Set cookie trước (tên 'locale' để đồng bộ với server)
+        setCookie('locale', lang, 365);
+        // Cập nhật hiển thị
+        const langSpan = document.getElementById('currentLang');
+        if (langSpan) {
+            langSpan.textContent = lang.toUpperCase();
+        }
+        // Tạo URL mới với param lang
+        let url = window.location.href;
+        // Xóa lang param cũ nếu có
+        url = url.replace(/[?&]lang=[^&]*/g, '');
+        // Thêm lang param mới
+        const separator = url.indexOf('?') > -1 ? '&' : '?';
+        url = url + separator + 'lang=' + lang;
+        // Chuyển trang
+        window.location.replace(url);
+        return false;
+    }
+
+    // Update display on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlLang = urlParams.get('lang');
+        const cookieLang = getCookie('locale');
+        const lang = urlLang || cookieLang || 'en';
+        const langSpan = document.getElementById('currentLang');
+        if (langSpan) {
+            langSpan.textContent = lang.toUpperCase();
+        }
+        // Set cookie nếu có param
+        if (urlLang) {
+            setCookie('locale', urlLang, 365);
+        }
+    });
+
+    // Notification functions
+    function markAllAsRead() {
+        fetch('/api/notifications/mark-all-read', { 
+            method: 'POST',
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                console.error('Failed to mark all as read');
+            }
+        })
+        .catch(err => console.error('Error:', err));
+    }
+
+    function markAllAdminAsRead() {
+        fetch('/api/notifications/admin/mark-all-read', { 
+            method: 'POST',
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                console.error('Failed to mark admin notifications as read');
+            }
+        })
+        .catch(err => console.error('Error:', err));
+    }
+
+    function markNotificationAsRead(id) {
+        fetch('/api/notifications/' + id + '/read', { method: 'POST' })
+            .then(() => location.reload());
+    }
+</script>
+
 </body>
 </html>

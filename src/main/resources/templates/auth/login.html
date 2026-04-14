@@ -3,40 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | ShoeHouse</title>
+    <title th:text="#{nav.login} + ' | ShoeHouse'">Login | ShoeHouse</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/site.css}">
 </head>
 <body class="auth-bg">
+<div th:replace="~{fragments/site :: toast}"></div>
 <section class="auth-shell">
     <div class="auth-card">
         <div class="mb-4 text-center">
             <div class="brand-mark mx-auto mb-3">S</div>
-            <h2 class="fw-bold">Welcome back</h2>
-            <p class="text-muted mb-0">Sign in to manage your sneakers.</p>
+            <h2 class="fw-bold" th:text="#{auth.welcome.back}">Welcome back</h2>
+            <p class="text-muted mb-0" th:text="#{auth.signin.to.manage}">Sign in to manage your sneakers.</p>
         </div>
 
         <div class="alert alert-danger" th:if="${param.error}">Invalid email or password.</div>
-        <div class="alert alert-success" th:if="${param.registered}">Registration successful. Please login.</div>
+        <div class="alert alert-success" th:if="${success}" th:text="${success}">Registration successful. Please login.</div>
         <div class="alert alert-info" th:if="${param.logout}">You have been logged out.</div>
 
         <form th:action="@{/login}" method="post" class="d-grid gap-3">
             <div>
-                <label class="form-label">Email</label>
+                <label class="form-label" th:text="#{auth.email}">Email</label>
                 <input class="form-control form-control-lg" type="email" name="username" placeholder="admin@gmail.com" required>
             </div>
             <div>
-                <label class="form-label">Password</label>
+                <label class="form-label" th:text="#{auth.password}">Password</label>
                 <input class="form-control form-control-lg" type="password" name="password" placeholder="123456" required>
             </div>
-            <button class="btn btn-accent btn-lg rounded-pill">Login</button>
+            <button class="btn btn-accent btn-lg rounded-pill" th:text="#{auth.login}">Login</button>
         </form>
 
         <div class="text-center mt-4">
-            <a th:href="@{/register}" class="text-decoration-none fw-semibold">Create account</a>
+            <a th:href="@{/forgot-password}" class="text-decoration-none fw-semibold" th:text="#{auth.forgot.password}">Forgot password?</a>
             <span class="mx-2 text-muted">•</span>
-            <a th:href="@{/}" class="text-decoration-none fw-semibold">Back home</a>
+            <a th:href="@{/register}" class="text-decoration-none fw-semibold" th:text="#{auth.create.account}">Create account</a>
+            <span class="mx-2 text-muted">•</span>
+            <a th:href="@{/}" class="text-decoration-none fw-semibold" th:text="#{auth.back.home}">Back home</a>
         </div>
 
         <div class="mt-4 small text-muted text-center">
@@ -45,5 +48,7 @@
     </div>
 </section>
 <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:replace="~{fragments/site :: toastScript}"></script>
+<script th:replace="~{fragments/site :: langScript}"></script>
 </body>
 </html>

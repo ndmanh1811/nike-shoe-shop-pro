@@ -13,7 +13,7 @@ public class CheckoutForm {
     private String address;
 
     @NotBlank
-    private String paymentMethod = "COD";
+    private String paymentMethod = "COD"; // COD or BANK
 
     private String couponCode;
 

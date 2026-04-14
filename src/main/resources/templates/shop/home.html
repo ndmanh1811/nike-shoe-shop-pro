@@ -13,31 +13,49 @@
     <link rel="stylesheet" th:href="@{/css/site.css}">
 </head>
 <body>
+<div th:replace="~{fragments/site :: toast}"></div>
 <div th:replace="~{fragments/site :: header}"></div>
 
 <section class="hero hero-home">
+    <!-- Floating particles decoration -->
+    <div class="hero-particles" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span>
+    </div>
     <div class="container py-5 py-lg-6">
         <div class="row align-items-center g-5">
-            <div class="col-lg-6">
-                <div class="eyebrow">New season drop</div>
-                <h1 class="display-3 fw-black lh-1 mt-3">Own the run.<br>Own the street.</h1>
-                <p class="lead text-white-50 mt-4 pe-lg-5">
+            <div class="col-lg-6 hero-content">
+                <div class="eyebrow reveal" th:text="#{home.new.season}">New season drop</div>
+                <h1 class="display-3 fw-black lh-1 mt-3 reveal" style="animation-delay:0.1s">
+                    Own the run.<br>Own the street.
+                </h1>
+                <p class="lead text-white-50 mt-4 pe-lg-5 reveal" style="animation-delay:0.2s">
                     Premium sneaker drops with a sharp athletic feel, inspired by the best modern sportswear stores.
                     Discover lifestyle, running and court models in one place.
                 </p>
-                <div class="d-flex flex-wrap gap-3 mt-4">
-                    <a class="btn btn-accent btn-lg rounded-pill px-4" th:href="@{/shop}">Shop collection</a>
-                    <a class="btn btn-outline-light btn-lg rounded-pill px-4" th:href="@{/wishlist}">View wishlist</a>
+                <div class="d-flex flex-wrap gap-3 mt-4 reveal" style="animation-delay:0.3s">
+                    <a class="btn btn-accent btn-lg rounded-pill px-4" th:href="@{/shop}">
+                        <i class="bi bi-bag me-2"></i><span th:text="#{home.shop.collection}">Shop collection</span>
+                    </a>
+                    <a class="btn btn-outline-light btn-lg rounded-pill px-4" th:href="@{/wishlist}">
+                        <i class="bi bi-heart me-2"></i><span th:text="#{nav.wishlist}">Wishlist</span>
+                    </a>
                 </div>
-                <div class="hero-stats mt-5">
-                    <div><strong>10+</strong><span>Hot picks</span></div>
-                    <div><strong>5</strong><span>Brands</span></div>
-                    <div><strong>5</strong><span>Categories</span></div>
+                <div class="hero-stats mt-5 reveal" style="animation-delay:0.4s">
+                    <a th:href="@{/shop}" class="text-decoration-none text-white">
+                        <div><strong>10+</strong><span th:text="#{home.hot.picks}">Hot picks</span></div>
+                    </a>
+                    <a th:href="@{/shop}" class="text-decoration-none text-white">
+                        <div><strong>5</strong><span th:text="#{home.brands}">Brands</span></div>
+                    </a>
+                    <a th:href="@{/shop}" class="text-decoration-none text-white">
+                        <div><strong>5</strong><span th:text="#{home.categories}">Categories</span></div>
+                    </a>
                 </div>
             </div>
-            <div class="col-lg-6 text-center">
-                <div class="hero-card">
-                    <img th:src="@{/img/hero-shoe.svg}" class="img-fluid hero-illustration" alt="hero">
+            <div class="col-lg-6 text-center reveal" style="animation-delay:0.3s">
+                <div class="hero-card" id="heroCard">
+                    <div class="hero-shoe-glow"></div>
+                    <img th:src="@{/img/hero-shoe.svg}" class="img-fluid hero-illustration" alt="Premium Sneakers">
                 </div>
             </div>
         </div>
@@ -47,18 +65,20 @@
 <section class="container py-5">
     <div class="section-title d-flex justify-content-between align-items-end mb-4">
         <div>
-            <div class="eyebrow text-dark">Featured categories</div>
-            <h2 class="fw-bold mb-0">Built for every move</h2>
+            <div class="eyebrow text-dark" th:text="#{home.featured.categories}">Featured categories</div>
+            <h2 class="fw-bold mb-0" th:text="#{home.built.every.move}">Built for every move</h2>
         </div>
-        <a class="text-decoration-none fw-semibold" th:href="@{/shop}">View all →</a>
+        <a class="text-decoration-none fw-semibold" th:href="@{/shop}" th:text="#{home.view.all} + ' →'">View all →</a>
     </div>
     <div class="row g-4">
         <div class="col-md-6 col-lg-3" th:each="c : ${featuredCategories}">
-            <div class="feature-card">
-                <div class="feature-icon"><i class="bi bi-stars"></i></div>
-                <h5 class="fw-bold mb-1" th:text="${c.name}"></h5>
-                <p class="text-white-50 mb-0">Premium selection for your daily style.</p>
-            </div>
+            <a th:href="@{/shop(categoryId=${c.id})}" class="text-decoration-none d-block h-100">
+                <div class="feature-card h-100">
+                    <div class="feature-icon"><i class="bi bi-stars"></i></div>
+                    <h5 class="fw-bold mb-1" th:text="${c.name}"></h5>
+                    <p class="text-white-50 mb-0">Premium selection for your daily style.</p>
+                </div>
+            </a>
         </div>
     </div>
 </section>
@@ -83,7 +103,7 @@
                 <div class="product-body">
                     <div class="d-flex justify-content-between align-items-start gap-2">
                         <div>
-                            <small class="text-uppercase text-white-50" th:text="${p.brand.name}"></small>
+                            <small class="text-uppercase text-white-50" th:if="${p.brand != null}" th:text="${p.brand.name}"></small>
                             <h5 class="mt-1 mb-1 fw-bold clamp-2" th:text="${p.name}"></h5>
                         </div>
                         <span class="badge rounded-pill text-bg-dark" th:if="${p.featured}">Featured</span>
@@ -113,7 +133,9 @@
         <h2 class="fw-bold mb-0">The icons behind the drops</h2>
     </div>
     <div class="brand-strip">
-        <div class="brand-pill" th:each="b : ${featuredBrands}" th:text="${b.name}"></div>
+        <a th:each="b : ${featuredBrands}" th:href="@{/shop(brandId=${b.id})}" class="brand-pill text-decoration-none d-inline-block">
+            <span th:text="${b.name}"></span>
+        </a>
     </div>
 </section>
 
@@ -127,12 +149,27 @@
             <div class="product-card compact">
                 <div class="product-thumb">
                     <img th:src="${p.imageUrl}" th:alt="${p.name}">
+                    <form th:action="@{/wishlist/toggle}" method="post" class="wishlist-floating-form">
+                        <input type="hidden" name="productId" th:value="${p.id}">
+                        <button class="icon-chip" type="submit" title="Add to wishlist">
+                            <i class="bi bi-heart"></i>
+                        </button>
+                    </form>
                 </div>
                 <div class="product-body">
                     <small class="text-white-50" th:text="${p.category.name}"></small>
                     <h6 class="fw-bold mt-1 clamp-2" th:text="${p.name}"></h6>
                     <div class="price-row mt-2">
                         <span class="price" th:text="${#numbers.formatDecimal(p.effectivePrice(),0,'COMMA',0,'POINT')} + ' đ'"></span>
+                    </div>
+                    <div class="d-flex gap-2 mt-3">
+                        <a th:href="@{/product/{slug}(slug=${p.slug})}" class="btn btn-light btn-sm rounded-pill flex-grow-1">Details</a>
+                        <form th:action="@{/cart/add}" method="post">
+                            <input type="hidden" name="productId" th:value="${p.id}">
+                            <input type="hidden" name="quantity" value="1">
+                            <input type="hidden" name="size" value="42">
+                            <button class="btn btn-accent btn-sm rounded-pill"><i class="bi bi-bag-plus"></i></button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -150,12 +187,27 @@
             <div class="product-card compact">
                 <div class="product-thumb">
                     <img th:src="${p.imageUrl}" th:alt="${p.name}">
+                    <form th:action="@{/wishlist/toggle}" method="post" class="wishlist-floating-form">
+                        <input type="hidden" name="productId" th:value="${p.id}">
+                        <button class="icon-chip" type="submit" title="Add to wishlist">
+                            <i class="bi bi-heart"></i>
+                        </button>
+                    </form>
                 </div>
                 <div class="product-body">
                     <small class="text-white-50" th:text="${p.category.name}"></small>
                     <h6 class="fw-bold mt-1 clamp-2" th:text="${p.name}"></h6>
                     <div class="price-row mt-2">
                         <span class="price" th:text="${#numbers.formatDecimal(p.effectivePrice(),0,'COMMA',0,'POINT')} + ' đ'"></span>
+                    </div>
+                    <div class="d-flex gap-2 mt-3">
+                        <a th:href="@{/product/{slug}(slug=${p.slug})}" class="btn btn-light btn-sm rounded-pill flex-grow-1">Details</a>
+                        <form th:action="@{/cart/add}" method="post">
+                            <input type="hidden" name="productId" th:value="${p.id}">
+                            <input type="hidden" name="quantity" value="1">
+                            <input type="hidden" name="size" value="42">
+                            <button class="btn btn-accent btn-sm rounded-pill"><i class="bi bi-bag-plus"></i></button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -165,5 +217,8 @@
 
 <div th:replace="~{fragments/site :: footer}"></div>
 <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:replace="~{fragments/site :: toastScript}"></script>
+<script th:replace="~{fragments/site :: langScript}"></script>
+<script th:src="@{/js/animations.js}"></script>
 </body>
 </html>

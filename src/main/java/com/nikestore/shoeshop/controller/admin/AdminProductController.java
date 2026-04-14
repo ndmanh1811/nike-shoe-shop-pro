@@ -72,8 +72,8 @@ public class AdminProductController {
         form.setFeatured(product.isFeatured());
         form.setBestseller(product.isBestseller());
         form.setActive(product.isActive());
-        form.setCategoryId(product.getCategory().getId());
-        form.setBrandId(product.getBrand().getId());
+        form.setCategoryId(product.getCategory() != null ? product.getCategory().getId() : null);
+        form.setBrandId(product.getBrand() != null ? product.getBrand().getId() : null);
 
         model.addAttribute("form", form);
         model.addAttribute("categories", categoryRepository.findAll());
@@ -92,6 +92,17 @@ public class AdminProductController {
             model.addAttribute("categories", categoryRepository.findAll());
             model.addAttribute("brands", brandRepository.findAll());
             return "admin/product-form";
+        }
+
+        // Check for duplicate slug (exclude current product when editing)
+        if (productRepository.existsBySlug(form.getSlug())) {
+            Product existing = productRepository.findBySlug(form.getSlug()).orElse(null);
+            if (existing != null && (form.getId() == null || !existing.getId().equals(form.getId()))) {
+                bindingResult.rejectValue("slug", "duplicate", "Slug already exists");
+                model.addAttribute("categories", categoryRepository.findAll());
+                model.addAttribute("brands", brandRepository.findAll());
+                return "admin/product-form";
+            }
         }
 
         Category category = categoryRepository.findById(form.getCategoryId()).orElseThrow();

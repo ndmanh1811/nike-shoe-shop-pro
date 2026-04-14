@@ -3,29 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ShoeHouse | Orders</title>
+    <title>ShoeHouse | <span th:text="#{nav.orders}">Orders</span></title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
     <link th:href="@{/webjars/bootstrap-icons/font/bootstrap-icons.css}" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/site.css}">
 </head>
 <body>
+<div th:replace="~{fragments/site :: toast}"></div>
 <div th:replace="~{fragments/site :: header}"></div>
 
 <section class="container py-5">
     <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-3">
         <div>
-            <div class="eyebrow text-dark">Your purchases</div>
-            <h1 class="fw-bold mb-0">Order history</h1>
+            <div class="eyebrow text-dark" th:text="#{orders.your.purchases}">Your purchases</div>
+            <h1 class="fw-bold mb-0" th:text="#{orders.order.history}">Order history</h1>
         </div>
-        <a th:href="@{/shop}" class="btn btn-outline-dark rounded-pill">Back to shop</a>
+        <a th:href="@{/shop}" class="btn btn-outline-dark rounded-pill" th:text="#{orders.back.shop}">Back to shop</a>
     </div>
 
-    <div class="order-card mb-4" th:each="o : ${orders}">
+    <a th:href="@{/orders/{id}(id=${o.id})}" class="text-decoration-none d-block order-card mb-4" th:each="o : ${orders}">
         <div class="d-flex justify-content-between flex-wrap gap-3 align-items-center">
             <div>
                 <div class="d-flex align-items-center gap-2">
-                    <h5 class="fw-bold mb-0" th:text="${o.orderCode}"></h5>
+                    <h5 class="fw-bold mb-0 text-dark" th:text="${o.orderCode}"></h5>
                     <span class="badge text-bg-warning" th:text="${o.status}"></span>
                 </div>
                 <div class="text-muted small mt-1">
@@ -35,7 +36,7 @@
             </div>
             <div class="text-end">
                 <div class="small text-muted">Total paid</div>
-                <div class="fs-4 fw-black" th:text="${#numbers.formatDecimal(o.totalAmount,0,'COMMA',0,'POINT')} + ' đ'"></div>
+                <div class="fs-4 fw-black text-dark" th:text="${#numbers.formatDecimal(o.totalAmount,0,'COMMA',0,'POINT')} + ' đ'"></div>
             </div>
         </div>
 
@@ -49,17 +50,20 @@
                 <strong th:text="${#numbers.formatDecimal(item.subtotal,0,'COMMA',0,'POINT')} + ' đ'"></strong>
             </div>
         </div>
-    </div>
+    </a>
 
     <div class="empty-state" th:if="${#lists.isEmpty(orders)}">
         <i class="bi bi-receipt"></i>
-        <h4 class="fw-bold mt-3">No orders yet</h4>
+        <h4 class="fw-bold mt-3" th:text="#{orders.no.orders}">No orders yet</h4>
         <p class="text-muted mb-0">Once you place an order, it will appear here.</p>
-        <a th:href="@{/shop}" class="btn btn-accent rounded-pill mt-4 px-4">Start shopping</a>
+        <a th:href="@{/shop}" class="btn btn-accent rounded-pill mt-4 px-4" th:text="#{orders.start.shopping}">Start shopping</a>
     </div>
 </section>
 
 <div th:replace="~{fragments/site :: footer}"></div>
 <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:replace="~{fragments/site :: toastScript}"></script>
+<script th:replace="~{fragments/site :: langScript}"></script>
+<script th:src="@{/js/animations.js}"></script>
 </body>
 </html>

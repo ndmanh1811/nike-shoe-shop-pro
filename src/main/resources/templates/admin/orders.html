@@ -19,16 +19,24 @@
             <div class="table-responsive">
                 <table class="table table-dark table-borderless align-middle">
                     <thead>
-                    <tr><th>Code</th><th>Customer</th><th>Email</th><th>Status</th><th>Total</th><th>Created</th></tr>
+                    <tr><th>Code</th><th>Customer</th><th>Email</th><th>Payment</th><th>Status</th><th>Total</th><th>Created</th><th>Actions</th></tr>
                     </thead>
                     <tbody>
                     <tr th:each="o : ${orders}">
                         <td><a class="text-white text-decoration-none" th:href="@{/admin/orders/{id}(id=${o.id})}" th:text="${o.orderCode}"></a></td>
                         <td th:text="${o.customerName}"></td>
                         <td th:text="${o.email}"></td>
+                        <td>
+                            <span class="badge" th:classappend="${o.paymentMethod.name() == 'COD' ? 'bg-success' : 'bg-info'}" th:text="${o.paymentMethod}"></span>
+                        </td>
                         <td><span class="badge text-bg-warning" th:text="${o.status}"></span></td>
                         <td th:text="${#numbers.formatDecimal(o.totalAmount,0,'COMMA',0,'POINT')} + ' đ'"></td>
                         <td th:text="${#temporals.format(o.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
+                        <td>
+                            <a th:href="@{/admin/orders/{id}(id=${o.id})}" class="btn btn-sm btn-outline-light rounded-pill">
+                                <i class="bi bi-eye"></i> View
+                            </a>
+                        </td>
                     </tr>
                     </tbody>
                 </table>

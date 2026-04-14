@@ -1,7 +1,14 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/webjars/bootstrap-icons/font/bootstrap-icons.css}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
 <body>
 <div th:fragment="layout(content)">
+    <div th:replace="~{fragments/site :: toast}"></div>
     <div class="admin-shell">
         <aside class="admin-sidebar">
             <div class="p-4 border-bottom border-secondary">
@@ -36,6 +43,9 @@
             <div class="container-fluid py-4" th:replace="~{::content}"></div>
         </main>
     </div>
+    <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    <script th:replace="~{fragments/site :: toastScript}"></script>
+    <script th:src="@{/js/animations.js}"></script>
 </div>
 </body>
 </html>

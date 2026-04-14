@@ -54,14 +54,13 @@ public class AdminController {
         CustomerOrder order = orderRepository.findById(id).orElseThrow();
         model.addAttribute("order", order);
         model.addAttribute("statuses", OrderStatus.values());
+        model.addAttribute("statusHistory", orderService.getOrderStatusHistory(id));
         return "admin/order-detail";
     }
 
     @PostMapping("/admin/orders/{id}/status")
-    public String updateStatus(@PathVariable Long id, @RequestParam OrderStatus status) {
-        CustomerOrder order = orderRepository.findById(id).orElseThrow();
-        order.setStatus(status);
-        orderRepository.save(order);
+    public String updateStatus(@PathVariable Long id, @RequestParam OrderStatus status, @RequestParam(required = false) String note) {
+        orderService.updateOrderStatus(id, status, note);
         return "redirect:/admin/orders/" + id;
     }
 }

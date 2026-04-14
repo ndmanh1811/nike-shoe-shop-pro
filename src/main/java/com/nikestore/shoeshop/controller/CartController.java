@@ -14,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class CartController {
@@ -43,9 +44,11 @@ public class CartController {
             @RequestParam Long productId,
             @RequestParam(defaultValue = "1") int quantity,
             @RequestParam(defaultValue = "42") String size,
-            HttpSession session
+            HttpSession session,
+            RedirectAttributes redirectAttributes
     ) {
         cartService.add(session, catalogService.requireProductById(productId), quantity, size);
+        redirectAttributes.addFlashAttribute("success", "Added to cart successfully!");
         return "redirect:/cart";
     }
 
@@ -60,44 +63,54 @@ public class CartController {
     }
 
     @PostMapping("/cart/update")
-    public String updateCart(@RequestParam Long productId, @RequestParam int quantity, @RequestParam String size, HttpSession session) {
-        cartService.update(session, productId, quantity, size);
+    public String updateCart(@RequestParam Long productId, @RequestParam int quantity, @RequestParam String size, HttpSession session, RedirectAttributes redirectAttributes) {
+        var product = catalogService.requireProductById(productId);
+        cartService.update(session, productId, quantity, size, product);
+        redirectAttributes.addFlashAttribute("success", "Cart updated successfully!");
         return "redirect:/cart";
     }
 
     @PostMapping("/cart/remove")
-    public String removeCart(@RequestParam Long productId, HttpSession session) {
+    public String removeCart(@RequestParam Long productId, HttpSession session, RedirectAttributes redirectAttributes) {
         cartService.remove(session, productId);
+        redirectAttributes.addFlashAttribute("info", "Item removed from cart.");
         return "redirect:/cart";
     }
 
     @PostMapping("/cart/coupon/apply")
-    public String applyCoupon(@RequestParam String couponCode, HttpSession session) {
+    public String applyCoupon(@RequestParam String couponCode, HttpSession session, RedirectAttributes redirectAttributes) {
         if (couponCode != null && !couponCode.isBlank()) {
             session.setAttribute(COUPON_KEY, couponCode.trim().toUpperCase());
+            redirectAttributes.addFlashAttribute("success", "Coupon applied successfully!");
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Please enter a coupon code.");
         }
         return "redirect:/cart";
     }
 
     @PostMapping("/cart/coupon/clear")
-    public String clearCoupon(HttpSession session) {
+    public String clearCoupon(HttpSession session, RedirectAttributes redirectAttributes) {
         session.removeAttribute(COUPON_KEY);
+        redirectAttributes.addFlashAttribute("info", "Coupon removed.");
         return "redirect:/cart";
     }
 
     @GetMapping("/checkout")
-    public String checkout(HttpSession session, Model model, Authentication authentication) {
+    public String checkout(HttpSession session, Model model, Authentication authentication, RedirectAttributes redirectAttributes) {
+        // Require login
+        if (authentication == null || !authentication.isAuthenticated()) {
+            redirectAttributes.addFlashAttribute("error", "Please login to proceed with checkout.");
+            return "redirect:/signin";
+        }
         if (cartService.count(session) == 0) {
             return "redirect:/shop";
         }
         CheckoutForm form = new CheckoutForm();
-        if (authentication != null && authentication.isAuthenticated()) {
-            var user = userRepository.findByEmail(authentication.getName()).orElse(null);
-            if (user != null) {
-                form.setCustomerName(user.getFullName());
-                form.setPhone(user.getPhone() != null ? user.getPhone() : "");
-                form.setAddress(user.getAddress() != null ? user.getAddress() : "");
-            }
+        var user = userRepository.findByEmail(authentication.getName()).orElse(null);
+        if (user != null) {
+            form.setCustomerName(user.getFullName());
+            form.setPhone(user.getPhone() != null ? user.getPhone() : "");
+            form.setAddress(user.getAddress() != null ? user.getAddress() : "");
         }
         form.setCouponCode(couponCode(session));
 
@@ -115,7 +128,13 @@ public class CartController {
                              BindingResult bindingResult,
                              HttpSession session,
                              Authentication authentication,
-                             Model model) {
+                             Model model,
+                             RedirectAttributes redirectAttributes) {
+        // Require login
+        if (authentication == null || !authentication.isAuthenticated()) {
+            redirectAttributes.addFlashAttribute("error", "Please login to place an order.");
+            return "redirect:/signin";
+        }
         if (cartService.count(session) == 0) {
             return "redirect:/shop";
         }
@@ -129,10 +148,11 @@ public class CartController {
             populateSummary(model, session, subtotal, form.getCouponCode(), couponQuote);
             return "shop/checkout";
         }
-        String email = authentication != null ? authentication.getName() : "guest@example.com";
+        String email = authentication.getName();
         CustomerOrder order = orderService.createOrder(form, cartService.items(session), email, couponQuote);
         cartService.clear(session);
         session.removeAttribute(COUPON_KEY);
+        redirectAttributes.addFlashAttribute("success", "Order placed successfully! Order code: " + order.getOrderCode());
         return "redirect:/checkout/success/" + order.getOrderCode();
     }
 

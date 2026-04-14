@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'ShoeHouse | ' + #{order.detail.title}">ShoeHouse | Order Detail</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/webjars/bootstrap-icons/font/bootstrap-icons.css}" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/site.css}">
+    <style>
+        .order-detail-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        }
+        .timeline-item-new {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .timeline-item-new:last-child {
+            border-bottom: none;
+        }
+        .timeline-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        .timeline-body {
+            flex: 1;
+        }
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+        .timeline-status {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .timeline-time {
+            color: #888;
+            font-size: 0.8rem;
+        }
+        .timeline-note {
+            color: #666;
+            font-size: 0.85rem;
+        }
+        .info-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+            margin-bottom: 16px;
+        }
+        .info-label {
+            color: #888;
+            font-size: 0.85rem;
+        }
+        .info-value {
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        .product-img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/site :: toast}"></div>
+<div th:replace="~{fragments/site :: header}"></div>
+
+<section class="container py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <div class="text-muted small mb-1" th:text="#{order.detail.title}">ORDER DETAILS</div>
+            <h2 class="fw-bold mb-0" th:text="${order.orderCode}"></h2>
+        </div>
+        <a th:href="@{/orders}" class="btn btn-outline-secondary btn-sm rounded-pill">
+            <i class="bi bi-arrow-left me-1"></i> <span th:text="#{order.detail.back}">Back to orders</span>
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <!-- Left Column -->
+        <div class="col-lg-8">
+            <!-- Timeline -->
+            <div class="order-detail-card mb-4">
+                <h6 class="fw-bold mb-3"><i class="bi bi-clock-history me-2"></i><span th:text="#{order.detail.timeline}">Order Timeline</span></h6>
+                <div th:if="${!#lists.isEmpty(statusHistory)}">
+                    <div th:each="history : ${statusHistory}" class="timeline-item-new">
+                        <div class="timeline-icon" th:style="'background-color:' + ${history.statusColor}">
+                            <i class="bi" th:class="${history.statusIcon}"></i>
+                        </div>
+                        <div class="timeline-body">
+                            <div class="timeline-header">
+                                <span class="timeline-status" th:text="${history.status}" th:style="'color:' + ${history.statusColor}"></span>
+                                <span class="timeline-time" th:text="${#temporals.format(history.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
+                            </div>
+                            <div class="timeline-note" th:text="${history.note}"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center py-4 text-muted" th:if="${#lists.isEmpty(statusHistory)}">
+                    <i class="bi bi-clock-history fs-1"></i>
+                    <p class="mb-0 mt-2" th:text="#{order.detail.no.status}">No status updates yet</p>
+                </div>
+            </div>
+
+            <!-- Order Items -->
+            <div class="order-detail-card">
+                <h6 class="fw-bold mb-3"><i class="bi bi-box-seam me-2"></i><span th:text="#{order.detail.items}">Order Items</span></h6>
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead class="table-light">
+                        <tr>
+                            <th th:text="#{order.detail.product}">Product</th>
+                            <th class="text-center" th:text="#{product.size}">Size</th>
+                            <th class="text-center" th:text="#{product.qty}">Qty</th>
+                            <th class="text-end" th:text="#{cart.price}">Price</th>
+                            <th class="text-end" th:text="#{cart.subtotal}">Subtotal</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="item : ${order.items}">
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <img th:if="${item.productImage}" th:src="${item.productImage}" class="product-img">
+                                    <span th:text="${item.productName}" class="fw-medium"></span>
+                                </div>
+                            </td>
+                            <td class="text-center" th:text="${item.size}"></td>
+                            <td class="text-center" th:text="${item.quantity}"></td>
+                            <td class="text-end" th:text="${#numbers.formatDecimal(item.unitPrice,0,'COMMA',0,'POINT')} + ' đ'"></td>
+                            <td class="text-end fw-bold" th:text="${#numbers.formatDecimal(item.subtotal,0,'COMMA',0,'POINT')} + ' đ'"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-lg-4">
+            <!-- Order Status Card -->
+            <div class="info-card">
+                <h6 class="fw-bold mb-3"><i class="bi bi-receipt me-2"></i><span th:text="#{order.detail.status}">Order Status</span></h6>
+                <div class="mb-3">
+                    <span class="badge rounded-pill px-3 py-2" th:text="${order.status}" 
+                          th:classappend="${order.status.toString() == 'PENDING' ? ' bg-warning' : (order.status.toString() == 'COMPLETED' ? ' bg-success' : (order.status.toString() == 'PAID' ? ' bg-primary' : (order.status.toString() == 'SHIPPED' ? ' bg-info' : ' bg-danger')))}"></span>
+                </div>
+                <div class="mb-2">
+                    <div class="info-label" th:text="#{order.date}">Order Date</div>
+                    <div class="info-value" th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}"></div>
+                </div>
+            </div>
+
+            <!-- Customer Info -->
+            <div class="info-card">
+                <h6 class="fw-bold mb-3"><i class="bi bi-person me-2"></i><span th:text="#{order.detail.customer}">Customer Info</span></h6>
+                <div class="mb-2">
+                    <div class="info-label" th:text="#{checkout.name}">Name</div>
+                    <div class="info-value" th:text="${order.customerName}"></div>
+                </div>
+                <div class="mb-2">
+                    <div class="info-label" th:text="#{auth.email}">Email</div>
+                    <div class="info-value" th:text="${order.email}"></div>
+                </div>
+                <div class="mb-2">
+                    <div class="info-label" th:text="#{checkout.phone}">Phone</div>
+                    <div class="info-value" th:text="${order.phone}"></div>
+                </div>
+                <div class="mb-0">
+                    <div class="info-label" th:text="#{checkout.address}">Shipping Address</div>
+                    <div class="info-value" th:text="${order.address}"></div>
+                </div>
+            </div>
+
+            <!-- Payment Summary -->
+            <div class="info-card">
+                <h6 class="fw-bold mb-3"><i class="bi bi-credit-card me-2"></i><span th:text="#{order.detail.payment}">Payment Summary</span></h6>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="info-label" th:text="#{checkout.payment.method}">Payment Method</span>
+                    <span class="badge" th:classappend="${order.paymentMethod.name() == 'COD' ? 'bg-success' : 'bg-info'}" th:text="${order.paymentMethod}"></span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="info-label" th:text="#{cart.subtotal}">Subtotal</span>
+                    <span th:text="${#numbers.formatDecimal(order.subtotalAmount,0,'COMMA',0,'POINT')} + ' đ'"></span>
+                </div>
+                <div class="d-flex justify-content-between mb-2" th:if="${order.discountAmount > 0}">
+                    <span class="info-label" th:text="#{cart.discount}">Discount</span>
+                    <span class="text-success">-<span th:text="${#numbers.formatDecimal(order.discountAmount,0,'COMMA',0,'POINT)}"></span> đ</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2" th:if="${order.couponCode != null}">
+                    <span class="info-label" th:text="#{cart.coupon}">Coupon</span>
+                    <span class="badge bg-dark" th:text="${order.couponCode}"></span>
+                </div>
+                <hr class="my-2">
+                <div class="d-flex justify-content-between">
+                    <span class="fw-bold" th:text="#{cart.total}">Total</span>
+                    <span class="fw-bold text-danger fs-5" th:text="${#numbers.formatDecimal(order.totalAmount,0,'COMMA',0,'POINT')} + ' đ'"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div th:replace="~{fragments/site :: footer}"></div>
+<script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:replace="~{fragments/site :: toastScript}"></script>
+<script th:replace="~{fragments/site :: langScript}"></script>
+<script th:src="@{/js/animations.js}"></script>
+</body>
+</html>

@@ -41,13 +41,14 @@ public class SecurityConfig {
                         "/",
                         "/shop/**",
                         "/product/**",
-                        "/signin",     // login page
-                        "/login",      // login processing
+                        "/signin",
+                        "/login",
                         "/register",
+                        "/forgot-password",
                         "/cart/**",
-                        "/checkout/**",
                         "/wishlist/**",
                         "/orders/**",
+                        "/checkout/**",
                         "/css/**",
                         "/js/**",
                         "/img/**",

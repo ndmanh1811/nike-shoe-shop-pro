@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>500 - Server Error | ShoeHouse</title>
+    <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/site.css}">
+    <style>
+        .error-page {
+            min-height: 60vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .error-code {
+            font-size: 8rem;
+            font-weight: 900;
+            color: #dc3545;
+            line-height: 1;
+        }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/site :: header}"></div>
+
+<section class="error-page">
+    <div class="container">
+        <div class="error-code">500</div>
+        <h1 class="fw-bold mt-3" th:text="${errorTitle ?: 'Server Error'}">Server Error</h1>
+        <p class="text-muted mt-2" th:text="${errorMessage ?: 'An unexpected error occurred. Please try again later.'}">
+            An unexpected error occurred. Please try again later.
+        </p>
+        <div class="mt-4">
+            <a th:href="@{/}" class="btn btn-accent rounded-pill px-4">Go Home</a>
+            <button onclick="location.reload()" class="btn btn-outline-dark rounded-pill px-4 ms-2">Reload</button>
+        </div>
+    </div>
+</section>
+
+<div th:replace="~{fragments/site :: footer}"></div>
+<script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

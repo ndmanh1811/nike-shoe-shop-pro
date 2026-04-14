@@ -71,11 +71,18 @@ public class HomeController {
 
     @GetMapping("/product/{slug}")
     public String detail(@PathVariable String slug, HttpSession session, Model model) {
-        Product product = catalogService.requireProductBySlug(slug);
-        model.addAttribute("product", product);
-        model.addAttribute("availableSizes", catalogService.availableSizes(product));
-        model.addAttribute("relatedProducts", catalogService.relatedProducts(product));
-        model.addAttribute("inWishlist", wishlistService.contains(session, product.getId()));
-        return "shop/product-detail";
+        try {
+            Product product = catalogService.requireProductBySlug(slug);
+            System.out.println("DEBUG: Product loaded - " + product.getName());
+            model.addAttribute("product", product);
+            model.addAttribute("availableSizes", catalogService.availableSizes(product));
+            model.addAttribute("relatedProducts", catalogService.relatedProducts(product));
+            model.addAttribute("inWishlist", wishlistService.contains(session, product.getId()));
+            return "shop/product-detail";
+        } catch (IllegalArgumentException e) {
+            System.out.println("DEBUG: Product not found for slug: " + slug);
+            model.addAttribute("error", "Product not found");
+            return "shop/product-detail";
+        }
     }
 }
