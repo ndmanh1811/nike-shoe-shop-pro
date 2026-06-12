@@ -78,30 +78,7 @@
                     <li class="nav-item"><a class="nav-link" th:href="@{/wishlist}" th:text="#{nav.wishlist}">Wishlist</a></li>
                     <li class="nav-item"><a class="nav-link" th:href="@{/orders}" th:text="#{nav.orders}">Orders</a></li>
                     
-                    <li class="nav-item dropdown ms-lg-3">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-1" href="#" role="button" data-bs-toggle="dropdown" id="langDropdown">
-                            <i class="bi bi-globe"></i>
-                            <span id="currentLang">EN</span>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
-                            <li>
-                                <a class="dropdown-item d-flex align-items-center gap-2" href="#" onclick="return setLang('en', event)">
-                                    <span>🇺🇸</span> English
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item d-flex align-items-center gap-2" href="#" onclick="return setLang('vi', event)">
-                                    <span>🇻🇳</span> Tiếng Việt
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
 
-                    <li class="nav-item d-flex align-items-center ms-lg-1 border-start border-secondary ps-lg-2">
-                        <button class="btn btn-link nav-link px-2 d-flex align-items-center" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
-                            <i class="theme-icon bi bi-moon-stars-fill fs-5"></i>
-                        </button>
-                    </li>
                 </ul>
 
                 <div class="d-flex align-items-center gap-2" th:if="${loggedIn}">
@@ -323,84 +300,8 @@
 </script>
 
 <script th:fragment="langScript">
-    // --- THEME / DARK MODE SCRIPT ---
-    function applyTheme(theme) {
-        document.documentElement.setAttribute('data-bs-theme', theme);
-        localStorage.setItem('theme', theme);
-        
-        // Update the icon
-        const icons = document.querySelectorAll('.theme-icon');
-        icons.forEach(icon => {
-            if (theme === 'dark') {
-                icon.className = 'theme-icon bi bi-sun-fill text-warning fs-5';
-            } else {
-                icon.className = 'theme-icon bi bi-moon-stars-fill fs-5 text-light';
-            }
-        });
-    }
-
-    function toggleTheme() {
-        const currentTheme = document.documentElement.getAttribute('data-bs-theme');
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        applyTheme(newTheme);
-    }
-
-    // Set theme immediately to avoid flash of light mode
-    (function() {
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        document.documentElement.setAttribute('data-bs-theme', savedTheme);
-    })();
-
-
-    // --- LANGUAGE SWITCHER SCRIPT ---
-    function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
-        return null;
-    }
-
-    function setCookie(name, value, days) {
-        const expires = new Date(Date.now() + days * 864e5).toUTCString();
-        document.cookie = `${name}=${value}; expires=${expires}; path=/`;
-    }
-
-    function setLang(lang, event) {
-        if (event) {
-            event.preventDefault();
-            event.stopPropagation();
-        }
-        setCookie('locale', lang, 365);
-        const langSpan = document.getElementById('currentLang');
-        if (langSpan) {
-            langSpan.textContent = lang.toUpperCase();
-        }
-        let url = window.location.href;
-        url = url.replace(/[?&]lang=[^&]*/g, '');
-        const separator = url.indexOf('?') > -1 ? '&' : '?';
-        url = url + separator + 'lang=' + lang;
-        window.location.replace(url);
-        return false;
-    }
-
     // --- DOM CONTENT LOADED EVENT ---
     document.addEventListener('DOMContentLoaded', function() {
-        // Init Theme Icon
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        applyTheme(savedTheme);
-
-        // Init Language
-        const urlParams = new URLSearchParams(window.location.search);
-        const urlLang = urlParams.get('lang');
-        const cookieLang = getCookie('locale');
-        const lang = urlLang || cookieLang || 'en';
-        const langSpan = document.getElementById('currentLang');
-        if (langSpan) {
-            langSpan.textContent = lang.toUpperCase();
-        }
-        if (urlLang) {
-            setCookie('locale', urlLang, 365);
-        }
     });
 
     // --- NOTIFICATION SCRIPT ---

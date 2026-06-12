@@ -308,10 +308,9 @@ a{text-decoration:none}
 /* Price Styling */
 .price-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .price{
-  font-weight:800;color:#fff;font-size:1.2rem;
-  background:linear-gradient(135deg,#fff,#ccc);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
+  font-weight:800;font-size:1.2rem;
+  color:#111;
+  -webkit-text-fill-color:#111;
 }
 
 .clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
